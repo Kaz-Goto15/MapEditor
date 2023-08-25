@@ -2,8 +2,8 @@
 #include "Engine/Model.h"
 
 //コンストラクタ
-Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"),
+Stage::Stage(GameObject* parent):
+    GameObject(parent, "Stage"),
     hModel_(-1)
 {
 }
@@ -29,7 +29,19 @@ void Stage::Update()
 //描画
 void Stage::Draw()
 {
-    Model::SetTransform(hModel_, transform_);
+    Transform stageTrans;
+
+    //Model::SetTransform(hModel_, transform_);
+    int stageRange = 15;
+    for (int z = 0; z < stageRange; z++) {
+        stageTrans.position_.z = z;
+        for (int x = 0; x < stageRange; x++) {
+            stageTrans.position_.x = x;
+            Model::SetTransform(hModel_, stageTrans);
+            Model::Draw(hModel_);
+        }
+
+    }
     Model::Draw(hModel_);
 
 }
