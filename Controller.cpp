@@ -6,6 +6,7 @@ Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
     movUnit_(0.1f)
 {
+    transform_.rotate_.x = 45.5;
     CamPosition_ = { 0,3,-8 };
     CamTarget_ = { 0,2,0 };
     Camera::SetPosition(CamPosition_);
@@ -27,6 +28,7 @@ void Controller::Update()
 {
     XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
     XMMATRIX mRotY = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));   //Y軸でY回転量分回転させる行列
+    XMMATRIX mRotX = XMMatrixRotationX(XMConvertToRadians(transform_.rotate_.x));   //X軸でX回転量分回転させる行列
     XMVECTOR vFrontMov = { 0, 0, movUnit_, 0 };                                          //1フレームの移動ベクトル
     vFrontMov = XMVector3TransformCoord(vFrontMov, mRotY);                                    //移動ベクトルを変形
     XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
@@ -60,17 +62,18 @@ void Controller::Update()
     if (Input::IsKey(DIK_RIGHTARROW)) {
         transform_.rotate_.y += 1.0f;
     }
-    //if (Input::IsKey(DIK_UPARROW)) {
-    //    XMFLOAT3  nrot = transform_.rotate_;
-    //    transform_.rotate_.x -= 1.0f;
-    //}
-    //if (Input::IsKey(DIK_DOWNARROW)) {
-    //    transform_.rotate_.x += 1.0f;
-    //}
+    if (Input::IsKey(DIK_UPARROW)) {
+        transform_.rotate_.x += 1.0f;
+        if (transform_.rotate_.x > 89.9f)transform_.rotate_.x = 89.9f;
+    }
+    if (Input::IsKey(DIK_DOWNARROW)) {
+        transform_.rotate_.x -= 1.0f;
+        if (transform_.rotate_.x < 0.0f)transform_.rotate_.x = 0.0f;
+    }
 
     //カメラ設定 位置->対象の後方
-    XMVECTOR vCam = { 0,5,-10,0 };                  //距離指定
-    vCam = XMVector3TransformCoord(vCam, mRotY);    //変形:回転          /*XMStoreFloat3(&CamPosition_, vPos + vCam);   //XMFLOAT3変換:現在座標+回転変形後の距離 Cameraの優秀な機能でVectorのまま入れられる*/
+    XMVECTOR vCam = { 0,0,-10,0 };                  //距離指定
+    vCam = XMVector3TransformCoord(vCam, mRotX * mRotY);    //変形:回転
     Camera::SetPosition(vPos + vCam);            //セット
 
     Camera::SetTarget(transform_.position_);
