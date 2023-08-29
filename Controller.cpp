@@ -1,7 +1,6 @@
 #include "Controller.h"
 #include "Engine/Camera.h"
 #include "Engine/Input.h"
-#include "Engine/Debug.h"
 //コンストラクタ
 Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
@@ -31,7 +30,6 @@ void Controller::Update()
     XMVECTOR nowVec = XMLoadFloat3(&transform_.position_);
     //1フレームの移動ベクトル
     XMVECTOR movVec = { 0, 0, movUnit_, 0 };
-    XMVECTOR movVec2 = { movUnit_, 0, 0, 0 };
     //Y軸でY回転量分回転させる行列
     XMMATRIX rotMat = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));
     //移動ベクトルを変形
@@ -56,25 +54,23 @@ void Controller::Update()
     if (Input::IsKey(DIK_W)) {
         nowVec += movVec;
         XMStoreFloat3(&transform_.position_, nowVec);
-        Debug::Log(transform_.position_.x);
     }
     //Press S to Back
     if (Input::IsKey(DIK_S)) {
         nowVec -= movVec;
         XMStoreFloat3(&transform_.position_, nowVec);
     }
-    //Press A to Left
+    //Press A to Left Move
     if (Input::IsKey(DIK_A)) {
-        /*movVec2 *= XMVector3Normalize(XMLoadFloat3(&transform_.rotate_));*/
+        //ベクトルの回転(外積)
         XMVECTOR b = XMVectorSet(0, 1, 0, 0);
-        XMVECTOR c = XMVector3Cross(movVec, b);    //cは(0, 1, 0)になる
-
-        //移動量追加
+        XMVECTOR c = XMVector3Cross(movVec, b);
         nowVec += c;
+
         //現在位置をベクトルからtransform_.position_に戻す
         XMStoreFloat3(&transform_.position_, nowVec);
     }
-    //Press D to Back
+    //Press D to Right Move
     if (Input::IsKey(DIK_D)) {
         XMVECTOR b = XMVectorSet(0, 1, 0, 0);
         XMVECTOR c = XMVector3Cross(movVec, b);    //cは(0, 1, 0)になる
