@@ -25,17 +25,42 @@ void Controller::Initialize()
 //更新
 void Controller::Update()
 {
-    
-    //戦車の現在位置をベクトル型に変換
-    XMVECTOR nowVec = XMLoadFloat3(&transform_.position_);
-    //1フレームの移動ベクトル
-    XMVECTOR movVec = { 0, 0, movUnit_, 0 };
-    //Y軸でY回転量分回転させる行列
-    XMMATRIX rotMat = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));
-    //移動ベクトルを変形
-    movVec = XMVector3TransformCoord(movVec, rotMat);
+    XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
+    XMMATRIX mRotY = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));   //Y軸でY回転量分回転させる行列
+    XMVECTOR vFrontMov = { 0, 0, movUnit_, 0 };                                          //1フレームの移動ベクトル
+    XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
+    vFrontMov = XMVector3TransformCoord(vFrontMov, mRotY);                                    //移動ベクトルを変形
+    vRightMov = XMVector3TransformCoord(vRightMov, mRotY);                                    //移動ベクトルを変形
+    //移動
+    //Press W to Move
+    if (Input::IsKey(DIK_W)) {
+        vPos += vFrontMov;
+    }
+    //Press S to Back
+    if (Input::IsKey(DIK_S)) {
+        vPos -= vFrontMov;
+    }
+    //Press A to Left Move
+    if (Input::IsKey(DIK_A)) {
+        ////ベクトルの回転(外積)
+        //XMVECTOR b = XMVectorSet(0, 1, 0, 0);
+        //XMVECTOR c = XMVector3Cross(vFrontMov, b);
+        //vPos += c;
+        vPos += vRightMov;
+    }
+    //Press D to Right Move
+    if (Input::IsKey(DIK_D)) {
+        //XMVECTOR b = XMVectorSet(0, 1, 0, 0);
+        //XMVECTOR c = XMVector3Cross(vFrontMov, b);    //cは(0, 1, 0)になる
 
-    //Rotate
+        ////移動量追加
+        //vPos -= c;
+        vPos -= vRightMov;
+    }
+
+    XMStoreFloat3(&transform_.position_, vPos); //現在位置をベクトルからtransform_.position_に戻す
+
+    //Rotate 回転
     if (Input::IsKey(DIK_LEFTARROW)) {
         transform_.rotate_.y -= 1.0f;
     }
@@ -50,48 +75,12 @@ void Controller::Update()
     //    transform_.rotate_.x += 1.0f;
     //}
 
-    //Press W to Move
-    if (Input::IsKey(DIK_W)) {
-        nowVec += movVec;
-        XMStoreFloat3(&transform_.position_, nowVec);
-    }
-    //Press S to Back
-    if (Input::IsKey(DIK_S)) {
-        nowVec -= movVec;
-        XMStoreFloat3(&transform_.position_, nowVec);
-    }
-    //Press A to Left Move
-    if (Input::IsKey(DIK_A)) {
-        //ベクトルの回転(外積)
-        XMVECTOR b = XMVectorSet(0, 1, 0, 0);
-        XMVECTOR c = XMVector3Cross(movVec, b);
-        nowVec += c;
-
-        //現在位置をベクトルからtransform_.position_に戻す
-        XMStoreFloat3(&transform_.position_, nowVec);
-    }
-    //Press D to Right Move
-    if (Input::IsKey(DIK_D)) {
-        XMVECTOR b = XMVectorSet(0, 1, 0, 0);
-        XMVECTOR c = XMVector3Cross(movVec, b);    //cは(0, 1, 0)になる
-
-        //移動量追加
-        nowVec -= c;
-        //現在位置をベクトルからtransform_.position_に戻す
-        XMStoreFloat3(&transform_.position_, nowVec);
-    }
-
-    //if (Input::IsKey(DIK_A))CamTarget_.x--;
+    //カメラ設定 位置->対象の後方
+    XMVECTOR vCam = { 0,5,-10,0 };                  //距離指定
+    vCam = XMVector3TransformCoord(vCam, mRotY);    //変形:回転          /*XMStoreFloat3(&CamPosition_, vPos + vCam);   //XMFLOAT3変換:現在座標+回転変形後の距離 Cameraの優秀な機能でVectorのまま入れられる*/
+    Camera::SetPosition(vPos + vCam);            //セット
 
     Camera::SetTarget(transform_.position_);
-    //カメラ位置->対象の後方
-    XMVECTOR vCam = { 0,5,-10,0 };                           //距離指定
-    vCam = XMVector3TransformCoord(vCam, rotMat);   //変形:回転
-    XMStoreFloat3(&CamPosition_, nowVec + vCam);          //XMFLOAT3変換:現在座標+回転変形後の距離
-    Camera::SetPosition(CamPosition_);                    //セット
-
-    //Camera::SetPosition(CamPosition_);
-    //Camera::SetTarget(CamTarget_);
 
 }
 
