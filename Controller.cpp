@@ -28,9 +28,11 @@ void Controller::Update()
     XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
     XMMATRIX mRotY = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));   //Y軸でY回転量分回転させる行列
     XMVECTOR vFrontMov = { 0, 0, movUnit_, 0 };                                          //1フレームの移動ベクトル
-    XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
     vFrontMov = XMVector3TransformCoord(vFrontMov, mRotY);                                    //移動ベクトルを変形
+    XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
     vRightMov = XMVector3TransformCoord(vRightMov, mRotY);                                    //移動ベクトルを変形
+    //XMVector3Cross(vFrontMov, XMVectorSet(0, -1, 0, 0));
+    
     //移動
     //Press W to Move
     if (Input::IsKey(DIK_W)) {
@@ -42,20 +44,11 @@ void Controller::Update()
     }
     //Press A to Left Move
     if (Input::IsKey(DIK_A)) {
-        ////ベクトルの回転(外積)
-        //XMVECTOR b = XMVectorSet(0, 1, 0, 0);
-        //XMVECTOR c = XMVector3Cross(vFrontMov, b);
-        //vPos += c;
-        vPos += vRightMov;
+        vPos -= vRightMov;
     }
     //Press D to Right Move
     if (Input::IsKey(DIK_D)) {
-        //XMVECTOR b = XMVectorSet(0, 1, 0, 0);
-        //XMVECTOR c = XMVector3Cross(vFrontMov, b);    //cは(0, 1, 0)になる
-
-        ////移動量追加
-        //vPos -= c;
-        vPos -= vRightMov;
+        vPos += vRightMov;
     }
 
     XMStoreFloat3(&transform_.position_, vPos); //現在位置をベクトルからtransform_.position_に戻す
