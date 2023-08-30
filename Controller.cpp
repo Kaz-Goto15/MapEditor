@@ -4,8 +4,7 @@
 //コンストラクタ
 Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
-    movUnit_(0.1f),
-    movMaxSpd_(movUnit_),
+    movMaxSpd_(0.15f),
     movSpd_(0)
 {
     transform_.rotate_.x = 45.5;
@@ -19,19 +18,33 @@ Controller::~Controller()
 //初期化
 void Controller::Initialize()
 {
+    movcode[MV_FRONT] = DIK_W;
 }
 
 //更新
 void Controller::Update()
 {
+    while (1) {
+        for (auto& k : movcode) {
+            if (Input::IsKey(k)) {
+                movSpd_ += movMaxSpd_ / 20;
+                if (movSpd_ > movMaxSpd_)movSpd_ = movMaxSpd_;
+                break;
+            }
+        }
+        movSpd_ -= movMaxSpd_ / 20;
+        if (movSpd_ < 0)movSpd_ = 0;
+        break;
+    }
+
     XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
     XMMATRIX mRotY = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));   //Y軸でY回転量分回転させる行列
     XMMATRIX mRotX = XMMatrixRotationX(XMConvertToRadians(transform_.rotate_.x));   //X軸でX回転量分回転させる行列
-    XMVECTOR vFrontMov = { 0, 0, movUnit_, 0 };                                          //1フレームの移動ベクトル
+    XMVECTOR vFrontMov = { 0, 0, movSpd_, 0 };                                          //1フレームの移動ベクトル
     vFrontMov = XMVector3TransformCoord(vFrontMov, mRotY);                                    //移動ベクトルを変形
-    XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
+    XMVECTOR vRightMov = { movSpd_, 0, 0, 0 };                                          //1フレームの移動ベクトル
     vRightMov = XMVector3TransformCoord(vRightMov, mRotY);                                    //移動ベクトルを変形
-    XMVECTOR vUpMov = { 0, movUnit_, 0, 0 };                                          //1フレームの移動ベクトル
+    XMVECTOR vUpMov = { 0, movSpd_, 0, 0 };                                          //1フレームの移動ベクトル
     vUpMov = XMVector3TransformCoord(vUpMov, mRotY);                                    //移動ベクトルを変形
     //XMVector3Cross(vFrontMov, XMVectorSet(0, -1, 0, 0));
     

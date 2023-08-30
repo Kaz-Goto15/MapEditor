@@ -1,9 +1,19 @@
 #include "Engine/GameObject.h"
+#include <dinput.h>
 
 //ステージを管理するクラス
 class Controller : public GameObject
 {
-    float movUnit_;
+    enum KEY {
+        MV_FRONT = DIK_W,
+        MV_BACK = DIK_S,
+        MV_LEFT = DIK_A,
+        MV_RIGHT = DIK_D,
+        MV_UP = DIK_Q,
+        MV_DOWN = DIK_E,
+        MV_MAX
+    };
+    int movcode[MV_MAX];
     float movSpd_, movMaxSpd_;
 public:
     //コンストラクタ

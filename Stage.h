@@ -16,8 +16,6 @@ namespace {
 class Stage : public GameObject
 {
     int hModel_[MODEL_NUM];    //ƒ‚ƒfƒ‹”Ô†
-    //int table_[Z_SIZE][X_SIZE];
-
     struct {
         BLOCKTYPE bType;
         int height;

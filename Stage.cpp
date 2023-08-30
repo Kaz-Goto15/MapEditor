@@ -19,8 +19,8 @@ Stage::Stage(GameObject* parent):
     std::fill(hModel_, hModel_+ MODEL_NUM, -1);
     for (int z = 0; z < Z_SIZE; z++) {
         for (int x = 0; x < X_SIZE; x++) {
-            SetBlock(x, z, (BLOCKTYPE)NULL);
-            SetBlockHeight(x, z, 1);
+            SetBlock(x, z, DEFAULT);
+            SetBlockHeight(x, z, 0);
         }
     }
 }
@@ -72,7 +72,7 @@ void Stage::Draw()
         stageTrans.position_.z = z;
         for (int x = 0; x < X_SIZE; x++) {
             stageTrans.position_.x = x;
-            for (int y = 0; y < table_[z][x].height; y++) {
+            for (int y = 0; y < table_[z][x].height + 1; y++) {
                 stageTrans.position_.y = y;
 
                 Model::SetTransform(hModel_[table_[z][x].bType], stageTrans);
