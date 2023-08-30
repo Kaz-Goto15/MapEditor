@@ -57,8 +57,8 @@ void Stage::Update()
 {
     if (Input::IsKey(DIK_SPACE)) {
         for (int i = 0; i < 15; i++) {
-            int xr = rand() % 15;
-            int zr = rand() % 15;
+            int xr = rand() % X_SIZE;
+            int zr = rand() % Z_SIZE;
             SetBlockHeight(xr, zr, table_[zr][xr].height += 1);
         }
     }
