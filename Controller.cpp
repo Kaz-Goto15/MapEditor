@@ -24,17 +24,13 @@ void Controller::Initialize()
 //更新
 void Controller::Update()
 {
-    while (1) {
-        for (auto& k : movcode) {
-            if (Input::IsKey(k)) {
-                movSpd_ += movMaxSpd_ / 20;
-                if (movSpd_ > movMaxSpd_)movSpd_ = movMaxSpd_;
-                break;
-            }
+    bool mvs = true;
+    for (auto& k : movcode) {
+        if (Input::IsKey(k)) {
+            movSpd_ += movMaxSpd_ / 20;
+            if (movSpd_ > movMaxSpd_)movSpd_ = movMaxSpd_;
+            break;
         }
-        movSpd_ -= movMaxSpd_ / 20;
-        if (movSpd_ < 0)movSpd_ = 0;
-        break;
     }
 
     XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
