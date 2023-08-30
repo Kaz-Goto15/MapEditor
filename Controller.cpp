@@ -4,13 +4,11 @@
 //コンストラクタ
 Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
-    movUnit_(0.1f)
+    movUnit_(0.1f),
+    movMaxSpd_(movUnit_),
+    movSpd_(0)
 {
     transform_.rotate_.x = 45.5;
-    CamPosition_ = { 0,3,-8 };
-    CamTarget_ = { 0,2,0 };
-    Camera::SetPosition(CamPosition_);
-    Camera::SetTarget(CamTarget_);
 }
 
 //デストラクタ
@@ -33,6 +31,8 @@ void Controller::Update()
     vFrontMov = XMVector3TransformCoord(vFrontMov, mRotY);                                    //移動ベクトルを変形
     XMVECTOR vRightMov = { movUnit_, 0, 0, 0 };                                          //1フレームの移動ベクトル
     vRightMov = XMVector3TransformCoord(vRightMov, mRotY);                                    //移動ベクトルを変形
+    XMVECTOR vUpMov = { 0, movUnit_, 0, 0 };                                          //1フレームの移動ベクトル
+    vUpMov = XMVector3TransformCoord(vUpMov, mRotY);                                    //移動ベクトルを変形
     //XMVector3Cross(vFrontMov, XMVectorSet(0, -1, 0, 0));
     
     //移動
@@ -51,6 +51,15 @@ void Controller::Update()
     //Press D to Right Move
     if (Input::IsKey(DIK_D)) {
         vPos += vRightMov;
+    }
+    //追加した
+    //Press Q to Up
+    if (Input::IsKey(DIK_Q)) {
+        vPos += vUpMov;
+    }
+    //Press E to Down
+    if (Input::IsKey(DIK_E)) {
+        vPos -= vUpMov;
     }
 
     XMStoreFloat3(&transform_.position_, vPos); //現在位置をベクトルからtransform_.position_に戻す

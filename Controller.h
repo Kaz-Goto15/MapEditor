@@ -3,8 +3,8 @@
 //ステージを管理するクラス
 class Controller : public GameObject
 {
-    XMFLOAT3 CamPosition_, CamTarget_;
     float movUnit_;
+    float movSpd_, movMaxSpd_;
 public:
     //コンストラクタ
     Controller(GameObject* parent);

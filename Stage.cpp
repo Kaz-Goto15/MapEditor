@@ -1,9 +1,15 @@
 #include "Stage.h"
 #include "Engine/Model.h"
+#include "Engine/Input.h"
 
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
-    table_[_x][_z] = _type;
+    table_[_z][_x].bType = _type;
+}
+
+void Stage::SetBlockHeight(int _x, int _z, int _height)
+{
+    table_[_z][_x].height = _height;
 }
 
 //コンストラクタ
@@ -11,9 +17,10 @@ Stage::Stage(GameObject* parent):
     GameObject(parent, "Stage")
 {
     std::fill(hModel_, hModel_+ MODEL_NUM, -1);
-    for (int x = 0; x < X_SIZE; x++) {
-        for (int z = 0; z < Z_SIZE; z++) {
-            table_[x][z] = -1;
+    for (int z = 0; z < Z_SIZE; z++) {
+        for (int x = 0; x < X_SIZE; x++) {
+            SetBlock(x, z, (BLOCKTYPE)NULL);
+            SetBlockHeight(x, z, 1);
         }
     }
 }
@@ -37,9 +44,9 @@ void Stage::Initialize()
         assert(hModel_[i] >= 0);
     }
     //ブロックのタイプをセット
-    for (int x = 0; x < X_SIZE; x++) {
-        for (int z = 0; z < Z_SIZE; z++) {
-            table_[x][z] = (x+z)%MODEL_NUM;
+    for (int z = 0; z < Z_SIZE; z++) {
+        for (int x = 0; x < X_SIZE; x++) {
+           SetBlock(x,z,(BLOCKTYPE)((x+z)%MODEL_NUM));
         }
     }
 
@@ -48,6 +55,13 @@ void Stage::Initialize()
 //更新
 void Stage::Update()
 {
+    if (Input::IsKey(DIK_SPACE)) {
+        for (int i = 0; i < 15; i++) {
+            int xr = rand() % 15;
+            int zr = rand() % 15;
+            SetBlockHeight(xr, zr, table_[zr][xr].height += 1);
+        }
+    }
 }
 
 //描画
@@ -58,8 +72,12 @@ void Stage::Draw()
         stageTrans.position_.z = z;
         for (int x = 0; x < X_SIZE; x++) {
             stageTrans.position_.x = x;
-            Model::SetTransform(hModel_[table_[x][z]], stageTrans);
-            Model::Draw(hModel_[table_[x][z]]);
+            for (int y = 0; y < table_[z][x].height; y++) {
+                stageTrans.position_.y = y;
+
+                Model::SetTransform(hModel_[table_[z][x].bType], stageTrans);
+                Model::Draw(hModel_[table_[z][x].bType]);
+            }
         }
 
     }
