@@ -24,16 +24,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 //エントリーポイント
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
-	XMVECTOR begin = XMVectorSet(1, 5, 1, 0);
-	XMVECTOR dirVec = XMVectorSet(0, -1, 0, 0);
-	XMVECTOR P1 = XMVectorSet(0, 0, 0, 0);
-	XMVECTOR P2 = XMVectorSet(0, 0,3, 0);
-	XMVECTOR P3 = XMVectorSet(3, 0, 0, 0);
-	float dist;
-
-	bool result = TriangleTests::Intersects(begin, dirVec, P1, P2, P3, dist);
-	int a;
-
 	//ウィンドウクラス（設計図）を作成
 	WNDCLASSEX wc;
 	wc.cbSize = sizeof(WNDCLASSEX);             //この構造体のサイズ
@@ -79,6 +69,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	hr = Direct3D::Initialize(winW, winH, hWnd);
 	if (FAILED(hr))PostQuitMessage(0); //エラー起きたら強制終了
 
+	//====================FBX RAYCAST=========================
+	XMVECTOR begin = XMVectorSet(1, 5, 1, 0);
+	XMVECTOR dirVec = XMVectorSet(0, -1, 0, 0);
+	XMVECTOR P1 = XMVectorSet(0, 0, 0, 0);
+	XMVECTOR P2 = XMVectorSet(0, 0, 3, 0);
+	XMVECTOR P3 = XMVectorSet(3, 0, 0, 0);
+	float dist;
+
+	bool result = TriangleTests::Intersects(begin, dirVec, P1, P2, P3, dist);
+	int a;
+
 	//Fbx* pFbx = new Fbx;
 	//pFbx->Load("Assets/BoxBrick.fbx");
 	//RayCastData data;
@@ -86,12 +87,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//data.dir = XMFLOAT3(/*your code!*/);
 	//pFbx->RayCast(data);
 	//int a;
-	//カメラ初期化
-	Camera::Initialize();
+	// =======================================================
 
 	//DirectInputの初期化
 	Input::Initialize(hWnd);
 
+	//カメラ初期化
+	Camera::Initialize();
 	
 	pRootJob = new RootJob(nullptr);
 	pRootJob->Initialize();
