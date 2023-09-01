@@ -4,7 +4,7 @@
 //コンストラクタ
 Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
-    movMaxSpd_(0.15f),
+    movMaxSpd_(0.2f),
     movSpd_(0)
 {
     transform_.rotate_.x = 45.5;
@@ -27,10 +27,15 @@ void Controller::Update()
     bool mvs = true;
     for (auto& k : movcode) {
         if (Input::IsKey(k)) {
-            movSpd_ += movMaxSpd_ / 20;
+            movSpd_ += movMaxSpd_ / 20.0f;
             if (movSpd_ > movMaxSpd_)movSpd_ = movMaxSpd_;
+            mvs = false;
             break;
         }
+    }
+    if (mvs) {
+        movSpd_ -= movMaxSpd_ / 40.0f;
+        if (movSpd_ < 0)movSpd_ = 0;
     }
 
     XMVECTOR vPos = XMLoadFloat3(&transform_.position_);                            //現在位置をベクトル型に変換
@@ -43,7 +48,7 @@ void Controller::Update()
     XMVECTOR vUpMov = { 0, movSpd_, 0, 0 };                                          //1フレームの移動ベクトル
     vUpMov = XMVector3TransformCoord(vUpMov, mRotY);                                    //移動ベクトルを変形
     //XMVector3Cross(vFrontMov, XMVectorSet(0, -1, 0, 0));
-    
+    vFrontMov *= 0.2f;
     //移動
     //Press W to Move
     if (Input::IsKey(DIK_W)) {

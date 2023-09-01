@@ -6,6 +6,7 @@
 #include "Engine/Input.h"
 #include "Engine/RootJob.h"
 #include "Engine/Model.h"
+//#include "Engine/Fbx.h"
 #include "directXCollision.h"
 
 #pragma comment(lib, "winmm.lib")
@@ -77,6 +78,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	HRESULT hr;
 	hr = Direct3D::Initialize(winW, winH, hWnd);
 	if (FAILED(hr))PostQuitMessage(0); //エラー起きたら強制終了
+
+	//Fbx* pFbx = new Fbx;
+	//pFbx->Load("Assets/BoxBrick.fbx");
+	//RayCastData data;
+	//data.start = XMFLOAT3(/*your code!*/);
+	//data.dir = XMFLOAT3(/*your code!*/);
+	//pFbx->RayCast(data);
+	//int a;
 	//カメラ初期化
 	Camera::Initialize();
 

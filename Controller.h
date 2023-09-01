@@ -5,15 +5,16 @@
 class Controller : public GameObject
 {
     enum KEY {
-        MV_FRONT = DIK_W,
-        MV_BACK = DIK_S,
-        MV_LEFT = DIK_A,
-        MV_RIGHT = DIK_D,
-        MV_UP = DIK_Q,
-        MV_DOWN = DIK_E,
+        MV_FRONT = 0,
+        MV_BACK,
+        MV_LEFT,
+        MV_RIGHT,
+        MV_UP ,
+        MV_DOWN,
         MV_MAX
     };
     int movcode[MV_MAX];
+    float movSpdRotate_[MV_MAX];
     float movSpd_, movMaxSpd_;
 public:
     //コンストラクタ
