@@ -55,6 +55,10 @@ void Stage::Initialize()
 //更新
 void Stage::Update()
 {
+    //ビューポート行列
+    //float w = (float)Direct3D::scrWidth / 2.0f;
+    //float h = (float)Direct3D::scrHeight / 2.0f;
+
     if (Input::IsKey(DIK_SPACE)) {
         for (int i = 0; i < 15; i++) {
             int xr = rand() % X_SIZE;

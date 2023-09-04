@@ -76,14 +76,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	XMVECTOR P2 = XMVectorSet(0, 0, 3, 0);
 	XMVECTOR P3 = XMVectorSet(3, 0, 0, 0);
 	float dist;
-
+	
 	bool result = TriangleTests::Intersects(begin, dirVec, P1, P2, P3, dist);
 	int a;
 
 	//Fbx* pFbx = new Fbx;
 	//pFbx->Load("Assets/BoxBrick.fbx");
 	//RayCastData data;
-	//data.start = XMFLOAT3(/*your code!*/);
+	//data.start = XMFLOAT3(Camera::);
 	//data.dir = XMFLOAT3(/*your code!*/);
 	//pFbx->RayCast(data);
 	//int a;
