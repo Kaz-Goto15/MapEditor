@@ -72,24 +72,25 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	hr = Direct3D::Initialize(winW, winH, hWnd);
 	if (FAILED(hr))PostQuitMessage(0); //エラー起きたら強制終了
 
-	//====================FBX RAYCAST=========================
-	XMVECTOR begin = XMVectorSet(1, 5, 1, 0);
-	XMVECTOR dirVec = XMVectorSet(0, -1, 0, 0);
-	XMVECTOR P1 = XMVectorSet(0, 0, 0, 0);
-	XMVECTOR P2 = XMVectorSet(0, 0, 3, 0);
-	XMVECTOR P3 = XMVectorSet(3, 0, 0, 0);
-	float dist;
-	
-	bool result = TriangleTests::Intersects(begin, dirVec, P1, P2, P3, dist);
-	int a;
+	//====================FBX RAYCAST TEST====================
 
 	//Fbx* pFbx = new Fbx;
 	//pFbx->Load("Assets/BoxBrick.fbx");
 	//RayCastData data;
-	//data.start = XMFLOAT3(Camera::);
-	//data.dir = XMFLOAT3(/*your code!*/);
+	//data.start = XMFLOAT4(0, 5, 5, 0);
+	//data.dir = XMFLOAT4(0, -1, 0, 0);
 	//pFbx->RayCast(data);
-	//int a;
+	//int a = 6;
+	// =======================================================
+	//====================FBX RAYCAST TEST====================
+
+	//Fbx* pFbx = new Fbx;
+	//pFbx->Load("Assets/BoxBrick.fbx");
+	//RayCastData data;
+	//data.start = XMFLOAT4(0, 5, 5, 0);
+	//data.dir = XMFLOAT4(0, -1, 0, 0);
+	//pFbx->RayCast(data);
+	//int a = 6;
 	// =======================================================
 
 	//DirectInputの初期化
