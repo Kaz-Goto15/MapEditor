@@ -20,6 +20,9 @@ class Stage : public GameObject
         BLOCKTYPE bType;
         int height;
     }table_[Z_SIZE][X_SIZE];
+
+    int mode_;      //0:あげる 1:さげる 2:種類カエル
+    int select_;    //種類
 public:
     //コンストラクタ
     Stage(GameObject* parent);
@@ -31,4 +34,7 @@ public:
 
     void SetBlock(int _x, int _z, BLOCKTYPE _type);
     void SetBlockHeight(int _x, int _z, int _height);
+
+    //偽プロシージャ
+    BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 };

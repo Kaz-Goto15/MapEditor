@@ -9,6 +9,7 @@
 //#include "Engine/Fbx.h"
 #include "directXCollision.h"
 #include "resource.h"
+#include "Stage.h"
 
 #pragma comment(lib, "winmm.lib")
 
@@ -185,13 +186,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+//ダイアログプロシージャ
 BOOL CALLBACK DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
-	{
-	case WM_INITDIALOG:
-		return TRUE;
-
-	}
-	return FALSE;
+	return ((Stage*)pRootJob->FindObject("Stage"))->DialogProc(hDlg, msg, wp, lp);
 }

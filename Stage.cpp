@@ -1,6 +1,8 @@
 #include "Stage.h"
 #include "Engine/Model.h"
 #include "Engine/Input.h"
+#include "resource.h"
+#include <string>
 
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
@@ -91,4 +93,23 @@ void Stage::Draw()
 //開放
 void Stage::Release()
 {
+}
+
+BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+        SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"レンガ");
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"草");
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"砂");
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"水");
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
+        return TRUE;
+    //case WM_COMMAND:
+    //    SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_GETCHECK, BST_CHECKED, 0);
+    }
+    return FALSE;
 }
