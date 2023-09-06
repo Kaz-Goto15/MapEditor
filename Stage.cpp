@@ -58,9 +58,38 @@ void Stage::Initialize()
 void Stage::Update()
 {
     //ビューポート行列
-    //float w = (float)Direct3D::scrWidth / 2.0f;
-    //float h = (float)Direct3D::scrHeight / 2.0f;
-
+    float w = (float)Direct3D::scrWidth / 2.0f;
+    float h = (float)Direct3D::scrHeight / 2.0f;
+    //offsetx,yは0
+    //minZ=0 maxZ=1
+    XMMATRIX vp = {
+        w,  0,  0,  0,
+        0, -h,  0,  0,
+        0,  0,  1,  0,
+        w,  h,  0,  1
+    };
+    //ビューポート
+    XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
+    //プロジェクション変換
+    XMMATRIX invProj = ;
+    //ビュー変換
+    XMMATRIX invview = ;
+    XMFLOAT3 mousePosFront; XMStoreFloat3(&mousePosFront, Input::GetMousePosition());
+    mousePosFront.z = 0.0f;
+    XMFLOAT3 mousePosBack = mousePosFront * 1;
+    //mousePosFront XMVECTORに変換
+    //それにinvVP,invProj,invViewをかける
+    //mousePosBackをXMVECTORに変換
+    //それに〃
+    //mousePosFrontからmousePosBackにかけてレイを打つ hmModel_[0]
+    //レイが当たったらブレークポイントで止める
+    XMVECTOR vMousePosFront = XMLoadFloat(&mousePosFront);
+    vMousePosFront = vMousePosFront * invVP * invProj * invview;
+    XMVECTOR vMousePosBack = XMLoadFloat(&mousePosBack);
+    vMousePosBack = vMousePosBack * invVP * invProj * invview;
+    RayCastData rd;
+    rd.start = XMStoreFloat4(vMousePosFront);
+    rd.\\\;
     if (Input::IsKey(DIK_SPACE)) {
         for (int i = 0; i < 15; i++) {
             int xr = rand() % X_SIZE;
