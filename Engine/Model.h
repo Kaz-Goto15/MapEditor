@@ -6,11 +6,11 @@
 
 namespace Model
 {
-	struct ModelData {
-		Fbx* pFbx_;
-		Transform transform_;
-		std::string fileName_;
-	};
+	//struct ModelData {
+	//	Fbx* pFbx_;
+	//	Transform transform_;
+	//	std::string fileName_;
+	//};
 	int Load(std::string fileName);
 	void SetTransform(int hModel, Transform transform);
 	void Draw(int hModel);

@@ -10,7 +10,7 @@ namespace Input
 	LPDIRECTINPUTDEVICE8	pMouseDevice;	//デバイスオブジェクト
 	DIMOUSESTATE mouseState;				//マウスの状態
 	DIMOUSESTATE prevMouseState;			//前フレームのマウスの状態
-	XMVECTOR mousePosition;				//マウスカーソルの位置
+	POINT mousePosition;				//マウスカーソルの位置
 
 	HRESULT Initialize(HWND hWnd)
 	{
@@ -109,14 +109,17 @@ namespace Input
 		return false;
 	}
 
-	XMVECTOR GetMousePosition()
+	XMFLOAT3 GetMousePosition()
 	{
-		return mousePosition;
+		XMFLOAT3 result = XMFLOAT3((float)mousePosition.x, (float)mousePosition.y, 0);
+		return result;
+		//return mousePosition;
 	}
 
 	void SetMousePosition(int x, int y)
 	{
-		mousePosition = XMVectorSet((float)x, (float)y, 0, 0);
+		mousePosition.x = (float)x;
+		mousePosition.y = (float)y;
 		std::string resStr = std::to_string(x) + ", " + std::to_string(y) + "\n";
 		OutputDebugString(resStr.c_str());
 	}

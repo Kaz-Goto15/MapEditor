@@ -24,7 +24,7 @@ namespace Input
 	bool IsMouseButtonDown(int buttonCode);
 	bool IsMouseButtonUp(int buttonCode);
 
-	XMVECTOR GetMousePosition();
+	XMFLOAT3 GetMousePosition();
 	void SetMousePosition(int x, int y);
 	//そのフレームでのマウスの移動量を取得
 	//戻値：X,Y マウスの移動量　／　Z,ホイールの回転量
