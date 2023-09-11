@@ -75,6 +75,7 @@ void Model::RayCast(int hModel, RayCastData& rayData)
 	};
 	XMVECTOR vStart = XMLoadFloat4(&rayData.start);
 	vStart = XMVector3TransformCoord(vStart, wInv);	//w—v‘f–³Ž‹
+	XMStoreFloat4(&rayData.start, vStart); //’l‚ðrayDat‚É–ß‚·
 	vPass = XMVector3TransformCoord(vPass, wInv);	//w—v‘f–³Ž‹
 	XMStoreFloat4(&rayData.dir, vPass - vStart );
 

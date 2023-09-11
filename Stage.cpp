@@ -84,7 +84,7 @@ void Stage::Update()
         //それにinvVP,invProj,invViewをかける
         //mousePosBackをXMVECTORに変換
         //それに〃
-        //mousePosFrontからmousePosBackにかけてレイを打つ hmModel_[0]
+        //mousePosFrontからmousePosBackにかけてレイを打つ hModel_[0]
         //レイが当たったらブレークポイントで止める
         XMVECTOR vMousePosFront = XMLoadFloat3(&mousePosFront);
         vMousePosFront = XMVector3TransformCoord(vMousePosFront, invVP * invProj * invview);
@@ -106,7 +106,8 @@ void Stage::Update()
                     Model::RayCast(hModel_[table_[z][x].bType], data);
                     if (data.hit) {
                         SetBlockHeight(x, z, table_[z][x].height += 1);
-                        //isHit = true;
+                        //table_[z][x].height++;
+                        isHit = true;
                         break;
                     }
                     if (isHit)break;
