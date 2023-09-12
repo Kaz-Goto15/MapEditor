@@ -92,6 +92,8 @@ void Stage::Update()
         vMousePosBack = XMVector3TransformCoord(vMousePosBack, invVP * invProj * invview);
 
         bool isHit = false;
+        float shortestDist = -1;
+        int changeTile[2]{ 0 };
         for (int z = 0; z < Z_SIZE; z++) {
             for (int x = 0; x < X_SIZE; x++) {
                 for (int y = 0; y < table_[z][x].height + 1; y++) {
@@ -102,19 +104,27 @@ void Stage::Update()
                     trans.position_.x = x;
                     trans.position_.y = y;
                     trans.position_.z = z;
-                    Model::SetTransform(hModel_[table_[z][x].bType], trans);
-                    Model::RayCast(hModel_[table_[z][x].bType], data);
+                    Model::SetTransform(hModel_[0], trans);
+                    Model::RayCast(hModel_[0], data);
                     if (data.hit) {
-                        SetBlockHeight(x, z, table_[z][x].height += 1);
-                        //table_[z][x].height++;
-                        isHit = true;
-                        break;
+                        if (shortestDist == -1 || data.dist < shortestDist) {
+                            shortestDist = data.dist;
+                            changeTile[0] = x;
+                            changeTile[1] = z;
+                        }
+                        //SetBlockHeight(x, z, table_[z][x].height += 1);
+                        //isHit = true;
+                        //break;
                     }
-                    if (isHit)break;
+                    //if (isHit)break;
                 }
-                if (isHit)break;
+                //if (isHit)break;
             }
-            if (isHit)break;
+            //if (isHit)break;
+        }
+
+        if (shortestDist != -1) {
+            SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
         }
     }
 

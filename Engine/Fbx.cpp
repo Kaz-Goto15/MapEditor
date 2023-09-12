@@ -282,16 +282,27 @@ void Fbx::Release()
 
 void Fbx::RayCast(RayCastData& rayData)
 {
+	rayData.hit = false;
+
 	for (int material = 0; material < materialCount_; material++) {
 		//あるマテリアルのindex数を3で割るとポリゴン数になる
 		for (int poly = 0; poly < indexCount_[material]/3; poly++) {
 			XMVECTOR v0 = pVertices_[ppIndex_[material][poly * 3 + 0]].position;
 			XMVECTOR v1 = pVertices_[ppIndex_[material][poly * 3 + 1]].position;
 			XMVECTOR v2 = pVertices_[ppIndex_[material][poly * 3 + 2]].position;
-			rayData.hit = TriangleTests::Intersects(XMLoadFloat4(&rayData.start), XMVector4Normalize(XMLoadFloat4(&rayData.dir)), v0, v1, v2, rayData.dist);
 
-			if (rayData.hit) {
-				return;
+			bool hit = false;
+			float dist = 0.0f;
+
+			hit = TriangleTests::Intersects(
+				XMLoadFloat4(&rayData.start), 
+				XMVector4Normalize(XMLoadFloat4(&rayData.dir)), 
+				v0, v1, v2, 
+				dist);
+
+			if (hit && dist < rayData.dist) {
+				rayData.hit = true;
+				rayData.dist = dist;
 			}
 		}
 	}
