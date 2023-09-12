@@ -299,20 +299,6 @@ void Fbx::RayCast(RayCastData& rayData)
 				XMVector4Normalize(XMLoadFloat4(&rayData.dir)), 
 				v0, v1, v2, 
 				dist);
-			if (hit) {
-				std::string resStr = "[Hit] start:" +
-					std::to_string(rayData.start.x) + ", " +
-					std::to_string(rayData.start.y) + ", " +
-					std::to_string(rayData.start.z) + "\n";
-
-				OutputDebugString(resStr.c_str());
-				//resStr = "       end1:" +
-				//	std::to_string(XMStoreFloat4(v0).x) + ", " +
-				//	std::to_string(rayData.start.y) + ", " +
-				//	std::to_string(rayData.start.z) + ", ";
-
-				//OutputDebugString(resStr.c_str());
-			}
 			if (hit && dist < rayData.dist) {
 				rayData.hit = true;
 				rayData.dist = dist;
