@@ -105,6 +105,7 @@ void Stage::Update()
                     trans.position_.y = y;
                     trans.position_.z = z;
                     Model::SetTransform(hModel_[0], trans);
+                    //Model::SetTransform(hModel[table_[z][x].bType].trans);
                     Model::RayCast(hModel_[0], data);
                     if (data.hit) {
                         if (shortestDist == -1 || data.dist < shortestDist) {
@@ -112,15 +113,9 @@ void Stage::Update()
                             changeTile[0] = x;
                             changeTile[1] = z;
                         }
-                        //SetBlockHeight(x, z, table_[z][x].height += 1);
-                        //isHit = true;
-                        //break;
                     }
-                    //if (isHit)break;
                 }
-                //if (isHit)break;
             }
-            //if (isHit)break;
         }
 
         if (shortestDist != -1) {
