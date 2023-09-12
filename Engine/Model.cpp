@@ -1,4 +1,5 @@
 #include "Model.h"
+
 namespace Model {
 	struct  ModelData
 	{

@@ -1,7 +1,6 @@
 #include "Stage.h"
 #include "Engine/Model.h"
 #include "Engine/Input.h"
-#include "resource.h"
 #include <string>
 
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
@@ -57,10 +56,10 @@ void Stage::Initialize()
 //更新
 void Stage::Update()
 {
-    if (Input::IsKeyDown(DIK_SPACE)) {
+    if (Input::IsMouseButtonDown(0)) {
         //ビューポート行列
-        float w = (float)Direct3D::scrWidth / 2.0f;
-        float h = (float)Direct3D::scrHeight / 2.0f;
+        float w = (float)(Direct3D::scrWidth / 2.0f);
+        float h = (float)(Direct3D::scrHeight / 2.0f);
         //offsetx,yは0
         //minZ=0 maxZ=1
         XMMATRIX vp = {
@@ -91,7 +90,6 @@ void Stage::Update()
         XMVECTOR vMousePosBack = XMLoadFloat3(&mousePosBack);
         vMousePosBack = XMVector3TransformCoord(vMousePosBack, invVP * invProj * invview);
 
-        bool isHit = false;
         float shortestDist = -1;
         int changeTile[2]{ 0 };
         for (int z = 0; z < Z_SIZE; z++) {
@@ -108,6 +106,8 @@ void Stage::Update()
                     //Model::SetTransform(hModel[table_[z][x].bType].trans);
                     Model::RayCast(hModel_[0], data);
                     if (data.hit) {
+                        std::string resStr = "Hit: " + std::to_string(z) + ", " + std::to_string(x) + "\n";
+                        OutputDebugString(resStr.c_str());
                         if (shortestDist == -1 || data.dist < shortestDist) {
                             shortestDist = data.dist;
                             changeTile[0] = x;
@@ -117,19 +117,22 @@ void Stage::Update()
                 }
             }
         }
-
+        std::string resStr = "change: " + std::to_string(changeTile[1]) + ", " + std::to_string(changeTile[0]) + "\n";
+        OutputDebugString(resStr.c_str());
         if (shortestDist != -1) {
-            SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
+            switch (mode_) {
+            case MODE::UP:
+                SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
+                break;
+            case MODE::DOWN:
+                if(table_[changeTile[1]][changeTile[0]].height > 0)
+                SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height -= 1);
+                break;
+            case MODE::CHANGE:
+                SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+            }
         }
     }
-
-    //if (Input::IsKey(DIK_SPACE)) {
-    //    for (int i = 0; i < 15; i++) {
-    //        int xr = rand() % X_SIZE;
-    //        int zr = rand() % Z_SIZE;
-    //        SetBlockHeight(xr, zr, table_[zr][xr].height += 1);
-    //    }
-    //}
 }
 
 //描画
@@ -163,6 +166,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
     {
     case WM_INITDIALOG:
         SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
+        mode_ = MODE::UP;
         SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
         SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"レンガ");
         SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"草");
@@ -170,8 +174,25 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
         SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"水");
         SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
         return TRUE;
-    //case WM_COMMAND:
-    //    SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_GETCHECK, BST_CHECKED, 0);
+    case WM_COMMAND:
+        if (SendMessage(GetDlgItem(hDlg, LOWORD(wp)), BM_GETCHECK, 0, 0) == BST_CHECKED) {
+            mode_ = LOWORD(wp);
+        }
+        if (LOWORD(wp) == IDC_COMBO3) {
+            select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
+                break;
+        }
+        //switch (LOWORD(wp)) {
+
+        //case IDC_RADIO_CHANGE:
+        //    if (SendMessage(GetDlgItem(hDlg, IDC_RADIO_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED) {
+        //        mode_ = LOWORD(wp);
+        //    }
+        //    break;
+        //case IDC_COMBO3:
+        //    select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
+        //    break;
+        //}
     }
     return FALSE;
 }

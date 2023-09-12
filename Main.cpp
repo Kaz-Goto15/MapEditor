@@ -82,16 +82,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//pFbx->RayCast(data);
 	//int a = 6;
 	// =======================================================
-	//====================FBX RAYCAST TEST====================
-
-	//Fbx* pFbx = new Fbx;
-	//pFbx->Load("Assets/BoxBrick.fbx");
-	//RayCastData data;
-	//data.start = XMFLOAT4(0, 5, 5, 0);
-	//data.dir = XMFLOAT4(0, -1, 0, 0);
-	//pFbx->RayCast(data);
-	//int a = 6;
-	// =======================================================
 
 	//DirectInput‚Ì‰Šú‰»
 	Input::Initialize(hWnd);
