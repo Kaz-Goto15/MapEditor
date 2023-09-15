@@ -1,12 +1,14 @@
 #include "Controller.h"
 #include "Engine/Camera.h"
 #include "Engine/Input.h"
+
 //コンストラクタ
 Controller::Controller(GameObject* parent) :
     GameObject(parent, "Controller"),
     movMaxSpd_(0.2f),
     movSpd_(0),
-    keyMovReg_(40.0f),
+    keyMovAcc_(30.0f),
+    keyMovDec_(20.0f),
     mouseMovReg_(0.5f)
 {
     transform_.rotate_.x = 45.5;
@@ -31,14 +33,19 @@ void Controller::Initialize()
 //更新
 void Controller::Update()
 {
+    if (enMovInertia_) {
+    }
+    else {
+
+    }
     //move
     for (int k = 0; k < MV_MAX; k++) {
         if (Input::IsKey(movcode[k])) {
-            movSpdRotate_[k] += movMaxSpd_ / keyMovReg_;
+            movSpdRotate_[k] += movMaxSpd_ / keyMovAcc_;
             if (movSpdRotate_[k] > movMaxSpd_)movSpdRotate_[k] = movMaxSpd_;
         }
         else {
-            movSpdRotate_[k] -= movMaxSpd_ / keyMovReg_;
+            movSpdRotate_[k] -= movMaxSpd_ / keyMovDec_;
             if (movSpdRotate_[k] < 0)movSpdRotate_[k] = 0;
         }
     }
@@ -135,13 +142,6 @@ void Controller::Update()
         if (transform_.rotate_.x < 0.0f)transform_.rotate_.x = 0.0f;
     }
 
-    //カメラ設定 位置->対象の後方
-    XMVECTOR vCam = { 0,0,-10,0 };                  //距離指定
-    vCam = XMVector3TransformCoord(vCam, mRotX * mRotY);    //変形:回転
-    Camera::SetPosition(vPos + vCam);            //セット
-
-    Camera::SetTarget(transform_.position_);
-
     */
 }
 
@@ -154,3 +154,28 @@ void Controller::Draw()
 void Controller::Release()
 {
 }
+
+/*
+BOOL Controller::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+        SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_SETCHECK, BST_CHECKED, 0);
+        enMovInertia_ = true;
+        SendMessage(GetDlgItem(hDlg, IDC_CHECK_ENABLE_MOUSE_ROTATE), BM_SETCHECK, BST_CHECKED, 0);
+        canMouseCtlRotate_ = true;
+        return TRUE;
+    case WM_COMMAND:
+        if (LOWORD(wp) == IDC_CHECK_INERTIA) {
+            enMovInertia_ = SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_GETCHECK, 0, 0);
+            break;
+        }
+        if (LOWORD(wp) == IDC_CHECK_ENABLE_MOUSE_ROTATE) {
+            canMouseCtlRotate_ = SendMessage(GetDlgItem(hDlg, IDC_CHECK_ENABLE_MOUSE_ROTATE), BM_GETCHECK, 0, 0);
+            break;
+        }
+    }
+    return FALSE;
+}
+*/

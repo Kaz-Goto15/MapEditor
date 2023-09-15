@@ -1,8 +1,8 @@
 #include "TestScene.h"
 #include "Engine/SceneManager.h"
 #include "Engine/Input.h"
-#include "Stage.h"
 #include "Controller.h"
+#include "Stage.h"
 TestScene::TestScene(GameObject* parent):GameObject(parent, "TestScene")
 {
 }

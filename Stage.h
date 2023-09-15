@@ -28,6 +28,7 @@ class Stage : public GameObject
 
     int mode_;      //0:あげる 1:さげる 2:種類カエル
     int select_;    //種類
+    bool a;
 
 public:
     //コンストラクタ
