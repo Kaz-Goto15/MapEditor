@@ -13,9 +13,10 @@ class Controller : public GameObject
         MV_DOWN,
         MV_MAX
     };
-    int movcode[MV_MAX];
-    float movSpdRotate_[MV_MAX];
+    int movcode[MV_MAX]{ 0 };
+    float movSpdRotate_[MV_MAX]{ 0 };
     float movSpd_, movMaxSpd_;
+    float mouseMovReg_, keyMovReg_;
 public:
     //コンストラクタ
     Controller(GameObject* parent);
