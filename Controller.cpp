@@ -33,11 +33,12 @@ void Controller::Initialize()
 //更新
 void Controller::Update()
 {
-    if (enMovInertia_) {
-    }
-    else {
+    //if (enMovInertia_) {
+    //}
+    //else {
 
-    }
+    //}
+    
     //move
     for (int k = 0; k < MV_MAX; k++) {
         if (Input::IsKey(movcode[k])) {
@@ -60,21 +61,32 @@ void Controller::Update()
     movSpdRotate_[MV_FRONT] - movSpdRotate_[MV_BACK]
     };
     XMVECTOR vMov = XMLoadFloat3(&fMov);
-    //vMov *= 0.2f;
     vMov = XMVector3TransformCoord(vMov, mRotY);
     vPos += vMov;
     XMStoreFloat3(&transform_.position_, vPos); //現在位置をベクトルからtransform_.position_に戻す
 
-    std::string resStr = std::to_string(Input::GetMouseMove().x) + ", " + std::to_string(Input::GetMouseMove().y) + "\n";
-    OutputDebugString(resStr.c_str());
-    //Rotate 回転
+    //Rotate(Mouse)
     if (Input::IsMouseButton(1)) {
         XMFLOAT3 mouseMov = Input::GetMouseMove();
         transform_.rotate_.y += mouseMov.x * mouseMovReg_;
         transform_.rotate_.x += mouseMov.y * mouseMovReg_;
         if (transform_.rotate_.x > 89.9f)transform_.rotate_.x = 89.9f;
         if (transform_.rotate_.x < 0.0f)transform_.rotate_.x = 0.0f;
-
+    }
+    //Rotate(Key)
+    if (Input::IsKey(DIK_LEFTARROW)) {
+        transform_.rotate_.y -= 1.0f;
+    }
+    if (Input::IsKey(DIK_RIGHTARROW)) {
+        transform_.rotate_.y += 1.0f;
+    }
+    if (Input::IsKey(DIK_UPARROW)) {
+        transform_.rotate_.x += 1.0f;
+        if (transform_.rotate_.x > 89.9f)transform_.rotate_.x = 89.9f;
+    }
+    if (Input::IsKey(DIK_DOWNARROW)) {
+        transform_.rotate_.x -= 1.0f;
+        if (transform_.rotate_.x < 0.0f)transform_.rotate_.x = 0.0f;
     }
 
     //カメラ設定 位置->対象の後方
@@ -123,25 +135,6 @@ void Controller::Update()
     if (Input::IsKey(DIK_E)) {
         vPos -= vUpMov;
     }
-
-    XMStoreFloat3(&transform_.position_, vPos); //現在位置をベクトルからtransform_.position_に戻す
-
-    //Rotate 回転
-    if (Input::IsKey(DIK_LEFTARROW)) {
-        transform_.rotate_.y -= 1.0f;
-    }
-    if (Input::IsKey(DIK_RIGHTARROW)) {
-        transform_.rotate_.y += 1.0f;
-    }
-    if (Input::IsKey(DIK_UPARROW)) {
-        transform_.rotate_.x += 1.0f;
-        if (transform_.rotate_.x > 89.9f)transform_.rotate_.x = 89.9f;
-    }
-    if (Input::IsKey(DIK_DOWNARROW)) {
-        transform_.rotate_.x -= 1.0f;
-        if (transform_.rotate_.x < 0.0f)transform_.rotate_.x = 0.0f;
-    }
-
     */
 }
 
@@ -154,6 +147,7 @@ void Controller::Draw()
 void Controller::Release()
 {
 }
+
 
 /*
 BOOL Controller::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
@@ -177,5 +171,4 @@ BOOL Controller::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
         }
     }
     return FALSE;
-}
 */
