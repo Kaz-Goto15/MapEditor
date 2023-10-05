@@ -2,7 +2,9 @@
 #include "Engine/Model.h"
 #include "Engine/Input.h"
 #include <string>
+#include <sstream>
 
+using std::string;
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
     table_[_z][_x].bType = _type;
@@ -11,6 +13,94 @@ void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 void Stage::SetBlockHeight(int _x, int _z, int _height)
 {
     table_[_z][_x].height = _height;
+}
+
+bool Stage::SaveFile()
+{
+    string fileName = "data.map";
+    HANDLE hFile;
+    //ファイルを開く
+    hFile = CreateFile(
+        fileName.c_str(),  //ファイル名
+        GENERIC_WRITE,              //アクセスモード（書き込み用）
+        0,                          //共有（なし）
+        NULL,                       //セキュリティ属性（継承しない）
+        CREATE_ALWAYS,              //作成方法
+        FILE_ATTRIBUTE_NORMAL,      //属性とフラグ（設定なし）
+        NULL);                      //拡張属性（なし）
+
+    if (hFile == INVALID_HANDLE_VALUE) {
+        MessageBox(NULL, ("CANNOT OPEN FILE: " + fileName).c_str(),"Error", MB_OK);
+        return false;
+    }
+
+    //データ書込
+    std::string writeData;
+    for (int z = 0; z < Z_SIZE; z++) {
+        for (int x = 0; x < X_SIZE; x++) {
+            std::stringstream ss;
+            ss << z << "," << x << "," << table_[z][x].height << "," << table_[z][x].bType << "\r\n";
+            writeData += ss.str();
+        }
+    }
+    writeData += "\0";
+
+    DWORD dwBytes = 0;				//書き込み位置
+    BOOL res = WriteFile(
+        hFile,								//ファイルハンドル
+        writeData.c_str(),                  //保存するデータ（文字列）
+        (DWORD)strlen(writeData.c_str()),   //書き込む文字数
+        &dwBytes,							//書き込んだサイズを入れる変数
+        NULL);								//オーバーラップド構造体（今回は使わない）
+
+    if (res == FALSE) {
+        MessageBox(NULL, ("FAILED TO WRITE: " + fileName).c_str(), "Error", MB_OK);
+        return false;
+    }
+
+    //ファイルを閉じる
+    CloseHandle(hFile);
+}
+
+bool Stage::LoadFile()
+{
+    string fileName = "data.map";
+    HANDLE hFile;
+    //ファイルを開く
+    hFile = CreateFile(
+        fileName.c_str(),  //ファイル名
+        GENERIC_READ,              //アクセスモード（書き込み用）
+        0,                          //共有（なし）
+        NULL,                       //セキュリティ属性（継承しない）
+        OPEN_EXISTING,              //作成方法
+        FILE_ATTRIBUTE_NORMAL,      //属性とフラグ（設定なし）
+        NULL);                      //拡張属性（なし）
+
+    if (hFile == INVALID_HANDLE_VALUE) {
+        MessageBox(NULL, ("CANNOT OPEN FILE: " + fileName).c_str(), "Error", MB_OK);
+        return false;
+    }
+
+    //ファイルサイズ取得
+    DWORD fileSize = GetFileSize(hFile, NULL);
+
+    //ファイルのサイズ分メモリを確保
+    char* data = new char[fileSize];
+
+    DWORD dwBytes = 0; //読み込み位置
+    BOOL res = ReadFile(
+        hFile,     //ファイルハンドル
+        data,      //データを入れる変数
+        fileSize,  //読み込むサイズ
+        &dwBytes,  //読み込んだサイズ
+        NULL);     //オーバーラップド構造体（今回は使わない）
+
+    if (res == FALSE) {
+        MessageBox(NULL, ("FAILED TO WRITE: " + fileName).c_str(), "Error", MB_OK);
+        return false;
+    }
+
+    CloseHandle(hFile);
 }
 
 //コンストラクタ
@@ -183,6 +273,14 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
         if (LOWORD(wp) == IDC_COMBO3) {
             select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
                 break;
+        }
+        if (LOWORD(wp) == ID_MENU_SAVE) {
+            SaveFile();
+            break;
+        }
+        if (LOWORD(wp) == ID_MENU_OPEN) {
+            LoadFile();
+            break;
         }
         //switch (LOWORD(wp)) {
 

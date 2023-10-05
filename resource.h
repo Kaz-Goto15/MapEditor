@@ -11,15 +11,16 @@
 #define IDC_COMBO1                      1019
 #define IDC_CHECK_INERTIA               1020
 #define IDC_CHECK_ENABLE_MOUSE_ROTATE   1021
-#define ID_40001                        40001
-#define ID_40002                        40002
+#define ID_MENU_NEW                     40006
+#define ID_MENU_OPEN                    40007
+#define ID_MENU_SAVE                    40008
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        107
-#define _APS_NEXT_COMMAND_VALUE         40003
+#define _APS_NEXT_RESOURCE_VALUE        108
+#define _APS_NEXT_COMMAND_VALUE         40009
 #define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
