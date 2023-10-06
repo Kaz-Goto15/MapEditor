@@ -17,11 +17,30 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 
 bool Stage::SaveFile()
 {
-    string fileName = "data.map";
+    char fileName[MAX_PATH] = "無題.map";  //ファイル名を入れる変数
+
+    //「ファイルを保存」ダイアログの設定
+    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
+    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
+    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")        //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+    ofn.lpstrFile = fileName;               	//ファイル名
+    ofn.nMaxFile = MAX_PATH;               	//パスの最大文字数
+    ofn.Flags = OFN_OVERWRITEPROMPT;   		//フラグ（同名ファイルが存在したら上書き確認）
+    ofn.lpstrDefExt = "map";                  	//デフォルト拡張子
+
+    //「ファイルを保存」ダイアログ
+    BOOL selFile;
+    selFile = GetSaveFileName(&ofn);
+
+    //キャンセルしたら中断
+    if (selFile == FALSE) return false;
+
     HANDLE hFile;
     //ファイルを開く
     hFile = CreateFile(
-        fileName.c_str(),  //ファイル名
+        fileName,  //ファイル名
         GENERIC_WRITE,              //アクセスモード（書き込み用）
         0,                          //共有（なし）
         NULL,                       //セキュリティ属性（継承しない）
@@ -30,7 +49,7 @@ bool Stage::SaveFile()
         NULL);                      //拡張属性（なし）
 
     if (hFile == INVALID_HANDLE_VALUE) {
-        MessageBox(NULL, ("CANNOT OPEN FILE: " + fileName).c_str(),"Error", MB_OK);
+        MessageBox(NULL, ("CANNOT OPEN FILE: " + (string)fileName).c_str(), "Error", MB_OK);
         return false;
     }
 
@@ -54,7 +73,7 @@ bool Stage::SaveFile()
         NULL);								//オーバーラップド構造体（今回は使わない）
 
     if (res == FALSE) {
-        MessageBox(NULL, ("FAILED TO WRITE: " + fileName).c_str(), "Error", MB_OK);
+        MessageBox(NULL, ("FAILED TO WRITE: " + (string)fileName).c_str(), "Error", MB_OK);
         return false;
     }
 
@@ -101,6 +120,9 @@ bool Stage::LoadFile()
     }
 
     CloseHandle(hFile);
+
+    //ここに持ってきたデータ読み込むコード
+
 }
 
 //コンストラクタ
