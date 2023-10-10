@@ -1,5 +1,7 @@
 #include "Engine/GameObject.h"
 #include "resource.h"
+#include <vector>
+
 namespace {
     const int MODEL_NUM = 5;
     const int X_SIZE = 15;
@@ -31,7 +33,14 @@ class Stage : public GameObject
     bool a;
     bool SaveFile();
     bool LoadFile();
-
+    /// <summary>
+    /// 読込ファイルからデータを格納
+    /// </summary>
+    /// <param name="_fileSize">ファイルサイズ</param>
+    /// <param name="_puredata">元データ文字列</param>
+    /// <param name="_data">データ格納配列</param>
+    void LoadData(DWORD _fileSize, char* _puredata, std::vector<std::vector<std::string>>* _data);
+    void GetSingleData(std::string* result, std::string data, DWORD* index);
 public:
     //コンストラクタ
     Stage(GameObject* parent);
