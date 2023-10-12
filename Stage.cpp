@@ -15,6 +15,19 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 	table_[_z][_x].height = _height;
 }
 
+void Stage::NewFile()
+{
+	if (DestructContent()) {
+		for (int z = 0; z < Z_SIZE; z++) {
+			for (int x = 0; x < X_SIZE; x++) {
+				SetBlock(x, z, DEFAULT);
+				SetBlockHeight(x, z, 0);
+			}
+		}
+		isEdited = false;
+	}
+}
+
 bool Stage::SaveFile()
 {
 	char fileName[MAX_PATH] = "無題.map";  //ファイル名を入れる変数
@@ -105,6 +118,7 @@ bool Stage::LoadFile()
 	//キャンセルしたら中断
 	if (selFile == FALSE) return false;
 
+	if (!DestructContent())return false;
 	HANDLE hFile;
 	//ファイルを開く
 	hFile = CreateFile(
@@ -161,6 +175,18 @@ bool Stage::LoadFile()
 	for (int y = 0; y < data_.size(); y++)
 		for (int x = 0; x < data_[y].size(); x++)
 			data_[y][x].clear();
+
+	isEdited = false;
+}
+
+bool Stage::DestructContent()
+{
+	if (isEdited) {
+		int result = MessageBox(NULL, "現在の編集データは破棄されますがよろしいですか?", "Map Editor", MB_OKCANCEL | MB_ICONEXCLAMATION);
+		if (result == IDOK)return true;
+		return false;
+	}
+	return true;
 }
 
 void Stage::LoadData(DWORD _fileSize, char* _puredata, std::vector<std::vector<std::string>>* _data)
@@ -202,15 +228,13 @@ void Stage::GetSingleData(std::string* result, std::string data, DWORD* index)
 
 //コンストラクタ
 Stage::Stage(GameObject* parent):
-	GameObject(parent, "Stage")
+	GameObject(parent, "Stage"),
+	mode_(-1),
+	select_(-1),
+	isEdited(false)
 {
 	std::fill(hModel_, hModel_+ MODEL_NUM, -1);
-	for (int z = 0; z < Z_SIZE; z++) {
-		for (int x = 0; x < X_SIZE; x++) {
-			SetBlock(x, z, DEFAULT);
-			SetBlockHeight(x, z, 0);
-		}
-	}
+	NewFile();
 }
 
 //デストラクタ
@@ -307,6 +331,7 @@ void Stage::Update()
 		std::string resStr = "change: " + std::to_string(changeTile[1]) + ", " + std::to_string(changeTile[0]) + "\n";
 		OutputDebugString(resStr.c_str());
 		if (shortestDist != -1) {
+			isEdited = true;
 			switch (mode_) {
 			case MODE::UP:
 				SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
@@ -317,6 +342,7 @@ void Stage::Update()
 				break;
 			case MODE::CHANGE:
 				SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				break;
 			}
 		}
 	}
@@ -355,7 +381,6 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		//SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_SETCHECK, BST_CHECKED, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
 		mode_ = MODE::UP;
-		a = true;
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"レンガ");
 		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"草");
@@ -377,6 +402,10 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		if (LOWORD(wp) == ID_MENU_OPEN) {
 			LoadFile();
+			break;
+		}
+		if (LOWORD(wp) == ID_MENU_NEW) {
+			NewFile();
 			break;
 		}
 		//switch (LOWORD(wp)) {

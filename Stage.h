@@ -30,9 +30,11 @@ class Stage : public GameObject
 
     int mode_;      //0:あげる 1:さげる 2:種類カエル
     int select_;    //種類
-    bool a;
+    bool isEdited;
+    void NewFile();
     bool SaveFile();
     bool LoadFile();
+    bool DestructContent();
     /// <summary>
     /// 読込ファイルからデータを格納
     /// </summary>
