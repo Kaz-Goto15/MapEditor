@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include "Stage.h"
 #include "Engine/Camera.h"
 #include "Engine/Input.h"
 
@@ -62,7 +63,7 @@ void Controller::Update()
 	default:
 		//Set(MouseL)
 		if (Input::IsMouseButtonUp(0)) {
-			FindObject("Stage")->Set();
+			(Stage)(FindObject("Stage"))->Set();
 		}
 		break;
 	}

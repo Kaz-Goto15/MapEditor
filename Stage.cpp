@@ -8,7 +8,6 @@
 using std::string;
 void Stage::Set()
 {
-	if (Input::IsMouseButtonDown(0)) {
 		//ビューポート行列
 		float w = (float)(Direct3D::scrWidth / 2.0f);
 		float h = (float)(Direct3D::scrHeight / 2.0f);
@@ -86,7 +85,6 @@ void Stage::Set()
 				break;
 			}
 		}
-	}
 }
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
