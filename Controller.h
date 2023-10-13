@@ -2,7 +2,7 @@
 #include <dinput.h>
 #include "resource.h"
 namespace {
-    enum KEY {
+    enum MOVE_KEY {
         MV_FRONT = 0,
         MV_BACK,
         MV_LEFT,
@@ -11,6 +11,14 @@ namespace {
         MV_DOWN,
         MV_MAX
     };
+
+    enum MODIFIER_KEY {
+        MD_DEFAULT = 0,
+        MD_ALT = DIK_LALT,
+        MD_CTRL = DIK_LCONTROL,
+        MD_MAX = sizeof(MODIFIER_KEY)-1
+    };
+
 }
 //操作を管理するクラス
 class Controller : public GameObject
@@ -19,8 +27,13 @@ class Controller : public GameObject
     float movSpdRotate_[MV_MAX]{ 0 };
     float movSpd_, movMaxSpd_;
     float mouseMovReg_, keyMovAcc_, keyMovDec_ ;
+    float camDistance;
+    float maxCamDist, minCamDist;
+    float camDistUnit, camDistReg;
+    MODIFIER_KEY modifyMode;
     bool enMovInertia_;
     bool canMouseCtlRotate_;
+    bool trigger_;
 
 public:
     Controller(GameObject* parent);
@@ -29,7 +42,4 @@ public:
     void Update() override;
     void Draw() override;
     void Release() override;
-
-    //偽プロシージャ
-    //BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 };

@@ -3,8 +3,91 @@
 #include "Engine/Input.h"
 #include <string>
 #include <sstream>
+#include "Controller.h"
 
 using std::string;
+void Stage::Set()
+{
+	if (Input::IsMouseButtonDown(0)) {
+		//ビューポート行列
+		float w = (float)(Direct3D::scrWidth / 2.0f);
+		float h = (float)(Direct3D::scrHeight / 2.0f);
+		//offsetx,yは0
+		//minZ=0 maxZ=1
+		XMMATRIX vp = {
+			w,  0,  0,  0,
+			0, -h,  0,  0,
+			0,  0,  1,  0,
+			w,  h,  0,  1
+		};
+		//ビューポート
+		XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
+		//プロジェクション変換
+		XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
+		//ビュー変換
+		XMMATRIX invview = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
+
+		XMFLOAT3 mousePosFront = Input::GetMousePosition();
+		mousePosFront.z = 0.0f;
+		XMFLOAT3 mousePosBack = Input::GetMousePosition();
+		mousePosBack.z = 1.0f;
+		//mousePosFront XMVECTORに変換
+		//それにinvVP,invProj,invViewをかける
+		//mousePosBackをXMVECTORに変換
+		//それに〃
+		//mousePosFrontからmousePosBackにかけてレイを打つ hModel_[0]
+		//レイが当たったらブレークポイントで止める
+		XMVECTOR vMousePosFront = XMLoadFloat3(&mousePosFront);
+		vMousePosFront = XMVector3TransformCoord(vMousePosFront, invVP * invProj * invview);
+		XMVECTOR vMousePosBack = XMLoadFloat3(&mousePosBack);
+		vMousePosBack = XMVector3TransformCoord(vMousePosBack, invVP * invProj * invview);
+
+		float shortestDist = -1;
+		int changeTile[2]{ 0 };
+		for (int z = 0; z < Z_SIZE; z++) {
+			for (int x = 0; x < X_SIZE; x++) {
+				for (int y = 0; y < table_[z][x].height + 1; y++) {
+					RayCastData data;
+					XMStoreFloat4(&data.start, vMousePosFront);
+					XMStoreFloat4(&data.dir, vMousePosBack - vMousePosFront);
+					Transform trans;
+					trans.position_.x = x;
+					trans.position_.y = y;
+					trans.position_.z = z;
+					Model::SetTransform(hModel_[0], trans);
+					//Model::SetTransform(hModel[table_[z][x].bType].trans);
+					Model::RayCast(hModel_[0], data);
+					if (data.hit) {
+						std::string resStr = "Hit: " + std::to_string(z) + ", " + std::to_string(x) + "\n";
+						OutputDebugString(resStr.c_str());
+						if (shortestDist == -1 || data.dist < shortestDist) {
+							shortestDist = data.dist;
+							changeTile[0] = x;
+							changeTile[1] = z;
+						}
+					}
+				}
+			}
+		}
+		std::string resStr = "change: " + std::to_string(changeTile[1]) + ", " + std::to_string(changeTile[0]) + "\n";
+		OutputDebugString(resStr.c_str());
+		if (shortestDist != -1) {
+			isEdited = true;
+			switch (mode_) {
+			case MODE::UP:
+				SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
+				break;
+			case MODE::DOWN:
+				if (table_[changeTile[1]][changeTile[0]].height > 0)
+					SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height -= 1);
+				break;
+			case MODE::CHANGE:
+				SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				break;
+			}
+		}
+	}
+}
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
 	table_[_z][_x].bType = _type;
@@ -267,85 +350,7 @@ void Stage::Initialize()
 //更新
 void Stage::Update()
 {
-	if (Input::IsMouseButtonDown(0)) {
-		//ビューポート行列
-		float w = (float)(Direct3D::scrWidth / 2.0f);
-		float h = (float)(Direct3D::scrHeight / 2.0f);
-		//offsetx,yは0
-		//minZ=0 maxZ=1
-		XMMATRIX vp = {
-			w,  0,  0,  0,
-			0, -h,  0,  0,
-			0,  0,  1,  0,
-			w,  h,  0,  1
-		};
-		//ビューポート
-		XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
-		//プロジェクション変換
-		XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
-		//ビュー変換
-		XMMATRIX invview = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
-
-		XMFLOAT3 mousePosFront = Input::GetMousePosition();
-		mousePosFront.z = 0.0f;
-		XMFLOAT3 mousePosBack = Input::GetMousePosition();
-		mousePosBack.z = 1.0f;
-		//mousePosFront XMVECTORに変換
-		//それにinvVP,invProj,invViewをかける
-		//mousePosBackをXMVECTORに変換
-		//それに〃
-		//mousePosFrontからmousePosBackにかけてレイを打つ hModel_[0]
-		//レイが当たったらブレークポイントで止める
-		XMVECTOR vMousePosFront = XMLoadFloat3(&mousePosFront);
-		vMousePosFront = XMVector3TransformCoord(vMousePosFront, invVP * invProj * invview);
-		XMVECTOR vMousePosBack = XMLoadFloat3(&mousePosBack);
-		vMousePosBack = XMVector3TransformCoord(vMousePosBack, invVP * invProj * invview);
-
-		float shortestDist = -1;
-		int changeTile[2]{ 0 };
-		for (int z = 0; z < Z_SIZE; z++) {
-			for (int x = 0; x < X_SIZE; x++) {
-				for (int y = 0; y < table_[z][x].height + 1; y++) {
-					RayCastData data;
-					XMStoreFloat4(&data.start, vMousePosFront);
-					XMStoreFloat4(&data.dir, vMousePosBack - vMousePosFront);
-					Transform trans;
-					trans.position_.x = x;
-					trans.position_.y = y;
-					trans.position_.z = z;
-					Model::SetTransform(hModel_[0], trans);
-					//Model::SetTransform(hModel[table_[z][x].bType].trans);
-					Model::RayCast(hModel_[0], data);
-					if (data.hit) {
-						std::string resStr = "Hit: " + std::to_string(z) + ", " + std::to_string(x) + "\n";
-						OutputDebugString(resStr.c_str());
-						if (shortestDist == -1 || data.dist < shortestDist) {
-							shortestDist = data.dist;
-							changeTile[0] = x;
-							changeTile[1] = z;
-						}
-					}
-				}
-			}
-		}
-		std::string resStr = "change: " + std::to_string(changeTile[1]) + ", " + std::to_string(changeTile[0]) + "\n";
-		OutputDebugString(resStr.c_str());
-		if (shortestDist != -1) {
-			isEdited = true;
-			switch (mode_) {
-			case MODE::UP:
-				SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
-				break;
-			case MODE::DOWN:
-				if(table_[changeTile[1]][changeTile[0]].height > 0)
-				SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height -= 1);
-				break;
-			case MODE::CHANGE:
-				SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
-				break;
-			}
-		}
-	}
+	
 }
 
 //描画

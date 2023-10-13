@@ -52,6 +52,7 @@ public:
     void Draw() override;
     void Release() override;
 
+    void Set();
     void SetBlock(int _x, int _z, BLOCKTYPE _type);
     void SetBlockHeight(int _x, int _z, int _height);
 
