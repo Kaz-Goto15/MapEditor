@@ -12,9 +12,9 @@ Controller::Controller(GameObject* parent) :
 	keyMovDec_(20.0f),
 	mouseMovReg_(0.5f),
 	camDistance(10.0f),
-	maxCamDist(100.0f),
+	maxCamDist(70.0f),
 	minCamDist(2.5f),
-	camDistUnit(2.0f),
+	camDistUnit(1.0f),
 	camDistReg(0.05f),
 	modifyMode(MD_DEFAULT)
 {
@@ -62,8 +62,8 @@ void Controller::Update()
 		break;
 	default:
 		//Set(MouseL)
-		if (Input::IsMouseButtonUp(0)) {
-			(Stage)(FindObject("Stage"))->Set();
+		if (Input::IsMouseButtonDown(0)) {
+			((Stage*)(FindObject("Stage")))->Set();
 		}
 		break;
 	}
