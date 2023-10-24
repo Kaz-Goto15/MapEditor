@@ -43,6 +43,59 @@ class Stage : public GameObject
     /// <param name="_data">データ格納配列</param>
     void LoadData(DWORD _fileSize, char* _puredata, std::vector<std::vector<std::string>>* _data);
     void GetSingleData(std::string* result, std::string data, DWORD* index);
+
+    enum DIRECTION {
+        DIR_LEFT = -1,
+        DIR_RIGHT = 1,
+        DIR_UP = 2,
+        DIR_DOWN= -2,
+        DIR_MAX
+    };
+    struct POINT {
+        int x = 0;
+        int z = 0;
+
+        void Set(int x, int z) {
+            this->x = x;
+            this->z = z;
+        }
+        bool operator == (const POINT pts) const {
+            return (x == pts.x && z == pts.z);
+        }
+        POINT operator = (const POINT pts) const {
+            return pts;
+        }
+        POINT operator + (const POINT& pts) {
+            POINT ret;
+            ret.x = x + pts.x;
+            ret.z = z + pts.z;
+            return ret;
+        }
+        POINT operator - (const POINT& pts) {
+            POINT ret;
+            ret.x = x - pts.x;
+            ret.z = z - pts.z;
+            return ret;
+        }
+        POINT operator += (const POINT& pts) {
+            return (*this + pts);
+        }
+        POINT operator -= (const POINT& pts) {
+            return (*this - pts);
+        }
+
+    };
+
+
+    struct FILLPOINT : POINT
+    {
+        std::vector<DIRECTION> prevDir;
+    };
+
+    void Fill(int _x, int _z, BLOCKTYPE _type);
+    void StoreDirToPoint(POINT &pts, DIRECTION dir);
+
+
 public:
     //コンストラクタ
     Stage(GameObject* parent);

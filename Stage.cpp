@@ -96,6 +96,62 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 	table_[_z][_x].height = _height;
 }
 
+void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
+{
+	//まず自身の色を記憶し、塗る
+	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
+	//whileでvectorが0になるまで続ける：
+	//vectorの一番最初を取り出す
+	//上下左右を視る　このとき、塗られる前の向きは調べない
+	//塗る前の色と最初に記録したやつが同じとき、塗り、登録する
+
+	//上下左右を0110みたいにしてANDやらORしてったほうが楽かもなあ
+	BLOCKTYPE fillType = table_[_z][_x].bType;
+	SetBlock(_x, _z, _type);
+
+	vector<FILLPOINT> fillList;
+	FILLPOINT tgt;
+	tgt.Set(_x, _z);
+	fillList.push_back(tgt);
+
+	while (fillList.size() > 0) {
+		FILLPOINT fTgt = fillList.front();
+		fillList.erase(fillList.begin());
+		//tgtPts
+		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
+			if(tgt.)
+			POINT dirPts;
+			StoreDirToPoint(dirPts, d);
+			//if (IsDirCanExtend(&pts, dirPts)) {
+			//	dirList.push_back(d);
+			//}
+		}
+	}
+	//SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+
+}
+
+void Stage::StoreDirToPoint(POINT &pts, DIRECTION dir)
+{
+	switch (dir)
+	{
+	case Stage::DIR_LEFT:
+		pts = { -1, 0 };
+		break;
+	case Stage::DIR_RIGHT:
+		pts = { 1, 0 };
+		break;
+	case Stage::DIR_UP:
+		pts = { 0,1 };
+		break;
+	case Stage::DIR_DOWN:
+		pts = { 0,-1 };
+		break;
+	default:
+		break;
+	}
+}
+
 void Stage::NewFile()
 {
 	if (DestructContent()) {
