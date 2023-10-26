@@ -111,6 +111,7 @@ void Controller::Update()
 	}
 
 	//Scale(MouseWheel)
+	OutputDebugString((std::to_string(Input::GetMouseMove().z) + "\n").c_str());
 	if (Input::GetMouseMove().z > 0)camDistance -= camDistUnit;
 	if (Input::GetMouseMove().z < 0)camDistance += camDistUnit;
 

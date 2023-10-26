@@ -81,7 +81,8 @@ void Stage::Set()
 					SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height -= 1);
 				break;
 			case MODE::CHANGE:
-				SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				//SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				Fill(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
 				break;
 			}
 		}
@@ -91,6 +92,11 @@ void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 	table_[_z][_x].bType = _type;
 }
 
+void Stage::SetBlock(POINT pts, BLOCKTYPE _type)
+{
+	SetBlock(pts.z, pts.x, _type);
+}
+
 void Stage::SetBlockHeight(int _x, int _z, int _height)
 {
 	table_[_z][_x].height = _height;
@@ -98,36 +104,51 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 
 void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 {
-	//まず自身の色を記憶し、塗る
 	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
 	//whileでvectorが0になるまで続ける：
 	//vectorの一番最初を取り出す
 	//上下左右を視る　このとき、塗られる前の向きは調べない
 	//塗る前の色と最初に記録したやつが同じとき、塗り、登録する
 
-	//上下左右を0110みたいにしてANDやらORしてったほうが楽かもなあ
+	//まず自身の種類を記憶し、塗る
 	BLOCKTYPE fillType = table_[_z][_x].bType;
 	SetBlock(_x, _z, _type);
 
 	vector<FILLPOINT> fillList;
-	FILLPOINT tgt;
-	tgt.Set(_x, _z);
-	fillList.push_back(tgt);
+	FILLPOINT tgtBase;
+	tgtBase.Set(_x, _z);
+	fillList.push_back(tgtBase);
 
+	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
 	while (fillList.size() > 0) {
 		FILLPOINT fTgt = fillList.front();
 		fillList.erase(fillList.begin());
-		//tgtPts
+		for (auto& d : DIRECTION) {
+
+		}
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-			if(tgt.)
-			POINT dirPts;
-			StoreDirToPoint(dirPts, d);
-			//if (IsDirCanExtend(&pts, dirPts)) {
-			//	dirList.push_back(d);
-			//}
+			if (std::find(fTgt.prevDir.begin(), fTgt.prevDir.end(), d) == fTgt.prevDir.end()) {
+				POINT dirPts;
+				StoreDirToPoint(dirPts, d);
+				POINT tgt = tgtBase + dirPts;
+
+				for (auto& fL : fillList) {
+					if (fL.GetPoint() == tgt) {
+						fL.prevDir.push_back(d);
+					}
+					break;
+				}
+
+				if (table_[tgt.z][tgt.x].bType == fillType) {
+					SetBlock(tgt, _type);
+					FILLPOINT pushPts;
+					pushPts.Set(tgt);
+					pushPts.prevDir.push_back(-d);
+					fillList.push_back(pushPts);
+				}
+			}
 		}
 	}
-	//SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
 
 }
 

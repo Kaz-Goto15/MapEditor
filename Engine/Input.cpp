@@ -128,7 +128,7 @@ namespace Input
 		XMFLOAT3 result = XMFLOAT3(
 			(float)mouseState.lX, 
 			(float)mouseState.lY, 
-			(float)mouseState.lZ
+			(float)mouseState.lZ - (float)prevMouseState.lZ
 		);
 		return result;
 	}
