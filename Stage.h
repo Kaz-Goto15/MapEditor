@@ -1,6 +1,7 @@
 #include "Engine/GameObject.h"
 #include "resource.h"
 #include <vector>
+#include <iostream>
 
 namespace {
 	const int MODEL_NUM = 5;
@@ -51,9 +52,17 @@ class Stage : public GameObject
 		DIR_DOWN= -2,
 		DIR_MAX
 	};
-
 	DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
 	DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
+	DIRECTION operator*(DIRECTION dir) { return dir; }
+	DIRECTION operator++(DIRECTION& dir) {
+		return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
+	}
+	std::ostream operator<<(std::ostream& os, DIRECTION dir) {
+		switch (dir) {
+		case DIRECTION::DIR_LEFT: return os << "Top";
+		}
+	}
 
 	typedef struct POINT {
 		int x = 0;
