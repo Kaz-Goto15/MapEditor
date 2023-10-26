@@ -46,23 +46,23 @@ class Stage : public GameObject
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
 	enum DIRECTION {
-		DIR_LEFT = -1,
-		DIR_RIGHT = 1,
-		DIR_UP = 2,
-		DIR_DOWN= -2,
+		DIR_LEFT = 0b1000,
+		DIR_RIGHT = 0b0100,
+		DIR_UP = 0b0010,
+		DIR_DOWN= 0b0001,
 		DIR_MAX
 	};
-	DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
-	DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
-	DIRECTION operator*(DIRECTION dir) { return dir; }
-	DIRECTION operator++(DIRECTION& dir) {
-		return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
-	}
-	std::ostream operator<<(std::ostream& os, DIRECTION dir) {
-		switch (dir) {
-		case DIRECTION::DIR_LEFT: return os << "Top";
-		}
-	}
+	//DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
+	//DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
+	//DIRECTION operator*(DIRECTION dir) { return dir; }
+	//DIRECTION operator++(DIRECTION& dir) {
+	//	return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
+	//}
+	//std::ostream& operator<<(std::ostream& os, DIRECTION dir) {
+	//	switch (dir) {
+	//	case DIRECTION::DIR_LEFT: return os << "Top";
+	//	}
+	//}
 
 	typedef struct POINT {
 		int x = 0;
@@ -106,6 +106,7 @@ class Stage : public GameObject
 	struct FILLPOINT : POINT
 	{
 		std::vector<DIRECTION> prevDir;
+		byte dirByte = 0b0000;
 	};
 
 	void Fill(int _x, int _z, BLOCKTYPE _type);

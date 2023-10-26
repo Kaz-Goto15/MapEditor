@@ -120,25 +120,56 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 	fillList.push_back(tgtBase);
 
 	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
+	//while (fillList.size() > 0) {
+	//	FILLPOINT fTgt = fillList.front();
+	//	fillList.erase(fillList.begin());
+	//	//for (auto& d : DIRECTION) {
+	//	//	std::cout << d << std::endl;
+	//	//}
+	//	for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
+	//		if (std::find(fTgt.prevDir.begin(), fTgt.prevDir.end(), d) == fTgt.prevDir.end()) {
+	//			POINT dirPts;
+	//			StoreDirToPoint(dirPts, d);
+	//			POINT tgt = tgtBase + dirPts;
+
+	//			for (auto& fL : fillList) {
+	//				if (fL.GetPoint() == tgt) {
+	//					fL.prevDir.push_back(d);
+	//				}
+	//				break;
+	//			}
+
+	//			if (table_[tgt.z][tgt.x].bType == fillType) {
+	//				SetBlock(tgt, _type);
+	//				FILLPOINT pushPts;
+	//				pushPts.Set(tgt);
+	//				pushPts.prevDir.push_back(-d);
+	//				fillList.push_back(pushPts);
+	//			}
+	//		}
+	//	}
+	//}
+	
 	while (fillList.size() > 0) {
 		FILLPOINT fTgt = fillList.front();
 		fillList.erase(fillList.begin());
-		for (auto& d : DIRECTION) {
-
-		}
+		//ターゲットのbyteをdirとANDし、dirではないか
+		//trueであれば、既にfillListにあるかを視る
+		//　あればそれのdirByteに逆を追加する
+		//　なければtgt,dirByte逆を新規追加
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
 			if (std::find(fTgt.prevDir.begin(), fTgt.prevDir.end(), d) == fTgt.prevDir.end()) {
 				POINT dirPts;
 				StoreDirToPoint(dirPts, d);
 				POINT tgt = tgtBase + dirPts;
-
+	
 				for (auto& fL : fillList) {
 					if (fL.GetPoint() == tgt) {
 						fL.prevDir.push_back(d);
 					}
 					break;
 				}
-
+	
 				if (table_[tgt.z][tgt.x].bType == fillType) {
 					SetBlock(tgt, _type);
 					FILLPOINT pushPts;
