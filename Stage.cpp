@@ -157,8 +157,17 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 		//trueであれば、既にfillListにあるかを視る
 		//　あればそれのdirByteに逆を追加する
 		//　なければtgt,dirByte逆を新規追加
+
+		//前方向の逆を要するに全方向の逆と前方向とAND取って0だったらその方向はいいってわけでしょう
+
+		//前方向の逆を調べるため、byteを反転
+		byte findDir = ~fTgt.dirByte;
+
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-			if (std::find(fTgt.prevDir.begin(), fTgt.prevDir.end(), d) == fTgt.prevDir.end()) {
+			//反転ビット
+			if ((fTgt.dirByte & ReverseDir(d)) == 0) {
+
+			}
 				POINT dirPts;
 				StoreDirToPoint(dirPts, d);
 				POINT tgt = tgtBase + dirPts;
@@ -177,7 +186,6 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 					pushPts.prevDir.push_back(-d);
 					fillList.push_back(pushPts);
 				}
-			}
 		}
 	}
 
@@ -203,6 +211,26 @@ void Stage::StoreDirToPoint(POINT &pts, DIRECTION dir)
 		break;
 	}
 }
+
+Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
+{
+	switch (dir) {
+	case Stage::DIR_LEFT:	return Stage::DIR_RIGHT;
+	case Stage::DIR_RIGHT:	return Stage::DIR_LEFT;
+	case Stage::DIR_UP:		return Stage::DIR_DOWN;
+	case Stage::DIR_DOWN:	return Stage::DIR_UP;
+	}						return dir;
+}
+
+byte Stage::ReverseDir(byte b)
+{
+	byte tmp = 0b0000;
+	if (b & DIR_LEFT == DIR_LEFT) {
+		tmp |= DIR_RIGHT;
+	}
+	return tmp;
+}
+
 
 void Stage::NewFile()
 {
@@ -492,19 +520,19 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		//SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_SETCHECK, BST_CHECKED, 0);
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
 		mode_ = MODE::UP;
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"レンガ");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"草");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"砂");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_ADDSTRING, 0, (LPARAM)"水");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_SETCURSEL, 0, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"草");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"砂");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"水");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_SETCURSEL, 0, 0);
 		return TRUE;
 	case WM_COMMAND:
 		if (SendMessage(GetDlgItem(hDlg, LOWORD(wp)), BM_GETCHECK, 0, 0) == BST_CHECKED) {
 			mode_ = LOWORD(wp);
 		}
-		if (LOWORD(wp) == IDC_COMBO3) {
-			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
+		if (LOWORD(wp) == IDC_COMBO_BLOCKTYPE) {
+			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_GETCURSEL, 0, 0);
 				break;
 		}
 		if (LOWORD(wp) == ID_MENU_SAVE) {
@@ -526,8 +554,8 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		//        mode_ = LOWORD(wp);
 		//    }
 		//    break;
-		//case IDC_COMBO3:
-		//    select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO3), CB_GETCURSEL, 0, 0);
+		//case IDC_COMBO_BLOCKTYPE:
+		//    select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_GETCURSEL, 0, 0);
 		//    break;
 		//}
 	}

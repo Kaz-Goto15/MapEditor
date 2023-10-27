@@ -7,8 +7,8 @@
 #define IDC_RADIO_UP                    1014
 #define IDC_RADIO_DOWN                  1015
 #define IDC_RADIO_CHANGE                1016
-#define IDC_COMBO3                      1018
-#define IDC_COMBO1                      1019
+#define IDC_RADIO_FILL                  1017
+#define IDC_COMBO_BLOCKTYPE             1018
 #define IDC_CHECK_INERTIA               1020
 #define IDC_CHECK_ENABLE_MOUSE_ROTATE   1021
 #define ID_MENU_NEW                     40006

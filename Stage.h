@@ -2,6 +2,9 @@
 #include "resource.h"
 #include <vector>
 #include <iostream>
+#include <bitset>
+
+using std::bitset;
 
 namespace {
 	const int MODEL_NUM = 5;
@@ -18,6 +21,7 @@ namespace {
 		UP = IDC_RADIO_UP,
 		DOWN = IDC_RADIO_DOWN,
 		CHANGE= IDC_RADIO_CHANGE,
+		FILL = IDC_RADIO_FILL,
 	};
 }
 //ステージを管理するクラス
@@ -29,7 +33,7 @@ class Stage : public GameObject
 		int height;
 	}table_[Z_SIZE][X_SIZE];
 
-	int mode_;      //0:あげる 1:さげる 2:種類カエル
+	int mode_;      //0:あげる 1:さげる 2:種類カエル 3:ぬりつぶし
 	int select_;    //種類
 	bool isEdited;
 	void NewFile();
@@ -49,8 +53,8 @@ class Stage : public GameObject
 		DIR_LEFT = 0b1000,
 		DIR_RIGHT = 0b0100,
 		DIR_UP = 0b0010,
-		DIR_DOWN= 0b0001,
-		DIR_MAX
+		DIR_DOWN = 0b0001,
+		DIR_MAX = sizeof(DIRECTION) - 1,
 	};
 	//DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
 	//DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
@@ -106,12 +110,13 @@ class Stage : public GameObject
 	struct FILLPOINT : POINT
 	{
 		std::vector<DIRECTION> prevDir;
-		byte dirByte = 0b0000;
+		bitset<DIR_MAX> dirBit = 0;
 	};
 
 	void Fill(int _x, int _z, BLOCKTYPE _type);
 	void StoreDirToPoint(POINT &pts, DIRECTION dir);
-
+	DIRECTION ReverseDir(DIRECTION dir);
+	byte ReverseDir(byte b);
 
 public:
 	//コンストラクタ
