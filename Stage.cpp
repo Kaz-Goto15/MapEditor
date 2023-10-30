@@ -130,23 +130,24 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 		//前方向の逆を要するに全方向の逆と前方向とAND取って0だったらその方向はいいってわけでしょう
 
 		//前方向の逆を調べるため、byteを反転
-		bitset<DIR_MAX> findDir = ~fTgtBase.dirBit;
+		bitset<DIR_MAX> findDir = ~fTgtBase.prevDirBit;
 
 		//全方向から調べる方向を探す(前方向を1として記録しているため、
 		//反転させた後に方向ごとANDを取り1であれば調べられる)
-
+		//そもそも範囲内かを見る必要もあり
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-			bitset<DIR_MAX> dBit(d);
+			bitset<DIR_MAX> dBit(dirBit[d]);
 			if ((findDir & dBit) == dBit) {
 				//調べる方向の1マス先が既にぬりつぶしリストに存在するかを見る
 				//存在するならばそのままdirBitに調べている方向の"逆方向"を追加
 				//存在しなければ種類一致の条件をかけ、一致すればぬりつぶし、マスを新規追加
 				POINT tgt = fTgtBase.GetPoint() + StoreDirToPoint(d);
+				if (IsExistsWithin(tgt))break;
 				bool isExists = false;
 				for (auto& fL : fillList) {
 					if (fL.GetPoint() == tgt.GetPoint()) {
 						isExists = true;
-						fL.dirBit |= bitset<DIR_MAX>(ReverseDir(d));
+						fL.prevDirBit |= dirBit[ReverseDir(d)];
 						break;
 					}
 				}
@@ -155,7 +156,7 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 						SetBlock(tgt, _type);
 						FILLPOINT pushPts;
 						pushPts.Set(tgt);
-						pushPts.dirBit |= bitset<DIR_MAX>(ReverseDir(d));
+						pushPts.prevDirBit |= dirBit[ReverseDir(d)];
 					}
 				}
 			}
@@ -424,6 +425,13 @@ Stage::Stage(GameObject* parent):
 {
 	std::fill(hModel_, hModel_+ MODEL_NUM, -1);
 	NewFile();
+}
+
+bool Stage::IsExistsWithin(POINT pts)
+{
+	if (pts.x < 0 || pts.z < 0 || pts.x > X_SIZE || pts.z > Z_SIZE)
+		return false;
+	return true;
 }
 
 //デストラクタ

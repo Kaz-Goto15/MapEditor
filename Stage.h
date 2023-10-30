@@ -50,23 +50,16 @@ class Stage : public GameObject
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
 	enum DIRECTION {
-		DIR_LEFT = 0b1000,
-		DIR_RIGHT = 0b0100,
-		DIR_UP = 0b0010,
-		DIR_DOWN = 0b0001,
+		DIR_LEFT = 0,
+		DIR_RIGHT,
+		DIR_UP,
+		DIR_DOWN,
 		DIR_MAX = sizeof(DIRECTION),
 	};
-	//DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
-//DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
-//DIRECTION operator*(DIRECTION dir) { return dir; }
-//DIRECTION operator++(DIRECTION& dir) {
-//	return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
-//}
-//std::ostream& operator<<(std::ostream& os, DIRECTION dir) {
-//	switch (dir) {
-//	case DIRECTION::DIR_LEFT: return os << "Top";
-//	}
-//}
+	std::vector<bitset<DIR_MAX>> dirBit= {
+		0b1000,0b0100,0b0010,0b0001
+	};
+	bitset<DIR_MAX> GetDirBit(DIRECTION dir) { return dirBit[dir]; }
 	typedef struct POINT {
 		int x = 0;
 		int z = 0;
@@ -82,8 +75,10 @@ class Stage : public GameObject
 		bool operator == (const POINT pts) const {
 			return (x == pts.x && z == pts.z);
 		}
-		POINT operator = (const POINT pts) const {
-			return pts;
+		void operator = (const POINT pts) {
+			this->x = pts.x;
+			this->z = pts.z;
+			//return pts;
 		}
 		POINT operator + (const POINT& pts) {
 			POINT ret;
@@ -108,13 +103,14 @@ class Stage : public GameObject
 
 	struct FILLPOINT : POINT
 	{
-		bitset<DIR_MAX> dirBit = 0;
+		bitset<DIR_MAX> prevDirBit = 0;
 	};
 
 	void Fill(int _x, int _z, BLOCKTYPE _type);
 	void StoreDirToPoint(POINT& pts, DIRECTION dir);
 	POINT StoreDirToPoint(DIRECTION dir);
 	DIRECTION ReverseDir(DIRECTION dir);
+	bool IsExistsWithin(POINT pts);
 
 public:
 	//コンストラクタ
