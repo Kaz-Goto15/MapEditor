@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <bitset>
-
+#include <sstream>
 using std::bitset;
 
 namespace {
@@ -111,7 +111,9 @@ class Stage : public GameObject
 	POINT StoreDirToPoint(DIRECTION dir);
 	DIRECTION ReverseDir(DIRECTION dir);
 	bool IsExistsWithin(POINT pts);
-
+	std::stringstream ss;
+	std::string dirBitToStr(bitset<DIR_MAX> db);
+	std::string dirStr[DIR_MAX] = { "左","右","上","下" };
 public:
 	//コンストラクタ
 	Stage(GameObject* parent);

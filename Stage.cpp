@@ -104,6 +104,7 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 
 void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 {
+	ss.str(""); ss << "Trigger:[" << _z << "," << _x << "]\n";OutputDebugString(ss.str().c_str());
 	//é©êgÇÃè„â∫ç∂âEÇ™ìhÇÈëOÇÃêFÇ≈Ç†ÇÍÇŒÅAÇªÇ±ÇìhÇËÅAvectorÇ…ç¿ïWÇ∆ìhÇÁÇÍÇÈëOÇÃå¸Ç´ÇãLò^Ç∑ÇÈ
 	//whileÇ≈vectorÇ™0Ç…Ç»ÇÈÇ‹Ç≈ë±ÇØÇÈÅF
 	//vectorÇÃàÍî‘ç≈èâÇéÊÇËèoÇ∑
@@ -132,6 +133,8 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 		//ëOï˚å¸ÇÃãtÇí≤Ç◊ÇÈÇΩÇﬂÅAbyteÇîΩì]
 		bitset<DIR_MAX> findDir = ~fTgtBase.prevDirBit;
 
+		ss.str(""); ss << "Watch:[" << fTgtBase.z << "," << fTgtBase.x << "] Dir:" << dirBitToStr(findDir) << "\n"; OutputDebugString(ss.str().c_str());
+
 		//ëSï˚å¸Ç©ÇÁí≤Ç◊ÇÈï˚å¸ÇíTÇ∑(ëOï˚å¸Ç1Ç∆ÇµÇƒãLò^ÇµÇƒÇ¢ÇÈÇΩÇﬂÅA
 		//îΩì]Ç≥ÇπÇΩå„Ç…ï˚å¸Ç≤Ç∆ANDÇéÊÇË1Ç≈Ç†ÇÍÇŒí≤Ç◊ÇÁÇÍÇÈ)
 		//ÇªÇ‡ÇªÇ‡îÕàÕì‡Ç©Çå©ÇÈïKóvÇ‡Ç†ÇË
@@ -142,10 +145,17 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 				//ë∂ç›Ç∑ÇÈÇ»ÇÁÇŒÇªÇÃÇ‹Ç‹dirBitÇ…í≤Ç◊ÇƒÇ¢ÇÈï˚å¸ÇÃ"ãtï˚å¸"Çí«â¡
 				//ë∂ç›ÇµÇ»ÇØÇÍÇŒéÌóﬁàÍívÇÃèåèÇÇ©ÇØÅAàÍívÇ∑ÇÍÇŒÇ ÇËÇ¬Ç‘ÇµÅAÉ}ÉXÇêVãKí«â¡
 				POINT tgt = fTgtBase.GetPoint() + StoreDirToPoint(d);
-				if (IsExistsWithin(tgt))break;
+
+				ss.str(""); ss << "Find:[" << tgt.z << "," << tgt.x << "] DirFromWatch: " << dirStr[ReverseDir(d)] << "Result: "; OutputDebugString(ss.str().c_str());
+
+				if (!IsExistsWithin(tgt)) {
+					ss.str(""); ss << "OutofRange\n"; OutputDebugString(ss.str().c_str());
+					continue;
+				};
 				bool isExists = false;
 				for (auto& fL : fillList) {
 					if (fL.GetPoint() == tgt.GetPoint()) {
+						ss.str(""); ss << "Already Added\n"; OutputDebugString(ss.str().c_str());
 						isExists = true;
 						fL.prevDirBit |= dirBit[ReverseDir(d)];
 						break;
@@ -153,10 +163,12 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 				}
 				if (!isExists) {
 					if (table_[tgt.z][tgt.x].bType == fillType) {
+						ss.str(""); ss << "Fill&Add\n"; OutputDebugString(ss.str().c_str());
 						SetBlock(tgt, _type);
 						FILLPOINT pushPts;
 						pushPts.Set(tgt);
 						pushPts.prevDirBit |= dirBit[ReverseDir(d)];
+						fillList.push_back(pushPts);
 					}
 				}
 			}
@@ -203,7 +215,15 @@ Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
 	}						return dir;
 }
 
-
+std::string Stage::dirBitToStr(bitset<DIR_MAX> db)
+{
+	std::string ret;
+	for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
+		bitset<DIR_MAX> dBit(dirBit[d]);
+		if ((db & dBit) == dBit)ret.append(dirStr[d]);
+	}
+		return ret;
+}
 
 void Stage::NewFile()
 {
@@ -464,7 +484,9 @@ void Stage::Initialize()
 //çXêV
 void Stage::Update()
 {
-	
+	if (Input::IsKeyDown(DIK_8)) {
+		Set();
+	}
 }
 
 //ï`âÊ

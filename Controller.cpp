@@ -63,7 +63,7 @@ void Controller::Update()
 	default:
 		//Set(MouseL)
 		if (Input::IsMouseButtonDown(0)) {
-			((Stage*)(FindObject("Stage")))->Set();
+			//((Stage*)(FindObject("Stage")))->Set();
 		}
 		break;
 	}
@@ -111,7 +111,7 @@ void Controller::Update()
 	}
 
 	//Scale(MouseWheel)
-	OutputDebugString((std::to_string(Input::GetMouseMove().z) + "\n").c_str());
+	//OutputDebugString((std::to_string(Input::GetMouseMove().z) + "\n").c_str());
 	if (Input::GetMouseMove().z > 0)camDistance -= camDistUnit;
 	if (Input::GetMouseMove().z < 0)camDistance += camDistUnit;
 
