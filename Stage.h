@@ -20,7 +20,7 @@ namespace {
 	enum MODE {
 		UP = IDC_RADIO_UP,
 		DOWN = IDC_RADIO_DOWN,
-		CHANGE= IDC_RADIO_CHANGE,
+		CHANGE = IDC_RADIO_CHANGE,
 		FILL = IDC_RADIO_FILL,
 	};
 }
@@ -54,20 +54,19 @@ class Stage : public GameObject
 		DIR_RIGHT = 0b0100,
 		DIR_UP = 0b0010,
 		DIR_DOWN = 0b0001,
-		DIR_MAX = sizeof(DIRECTION) - 1,
+		DIR_MAX = sizeof(DIRECTION),
 	};
 	//DIRECTION begin(DIRECTION) { return DIRECTION::DIR_LEFT; }
-	//DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
-	//DIRECTION operator*(DIRECTION dir) { return dir; }
-	//DIRECTION operator++(DIRECTION& dir) {
-	//	return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
-	//}
-	//std::ostream& operator<<(std::ostream& os, DIRECTION dir) {
-	//	switch (dir) {
-	//	case DIRECTION::DIR_LEFT: return os << "Top";
-	//	}
-	//}
-
+//DIRECTION end(DIRECTION) { return DIRECTION::DIR_MAX; }
+//DIRECTION operator*(DIRECTION dir) { return dir; }
+//DIRECTION operator++(DIRECTION& dir) {
+//	return dir = DIRECTION(std::underlying_type<DIRECTION>::type(dir) + 1);
+//}
+//std::ostream& operator<<(std::ostream& os, DIRECTION dir) {
+//	switch (dir) {
+//	case DIRECTION::DIR_LEFT: return os << "Top";
+//	}
+//}
 	typedef struct POINT {
 		int x = 0;
 		int z = 0;
@@ -109,14 +108,13 @@ class Stage : public GameObject
 
 	struct FILLPOINT : POINT
 	{
-		std::vector<DIRECTION> prevDir;
 		bitset<DIR_MAX> dirBit = 0;
 	};
 
 	void Fill(int _x, int _z, BLOCKTYPE _type);
-	void StoreDirToPoint(POINT &pts, DIRECTION dir);
+	void StoreDirToPoint(POINT& pts, DIRECTION dir);
+	POINT StoreDirToPoint(DIRECTION dir);
 	DIRECTION ReverseDir(DIRECTION dir);
-	byte ReverseDir(byte b);
 
 public:
 	//コンストラクタ

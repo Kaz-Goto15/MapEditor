@@ -118,42 +118,11 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 	FILLPOINT tgtBase;
 	tgtBase.Set(_x, _z);
 	fillList.push_back(tgtBase);
-
-	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
-	//while (fillList.size() > 0) {
-	//	FILLPOINT fTgt = fillList.front();
-	//	fillList.erase(fillList.begin());
-	//	//for (auto& d : DIRECTION) {
-	//	//	std::cout << d << std::endl;
-	//	//}
-	//	for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-	//		if (std::find(fTgt.prevDir.begin(), fTgt.prevDir.end(), d) == fTgt.prevDir.end()) {
-	//			POINT dirPts;
-	//			StoreDirToPoint(dirPts, d);
-	//			POINT tgt = tgtBase + dirPts;
-
-	//			for (auto& fL : fillList) {
-	//				if (fL.GetPoint() == tgt) {
-	//					fL.prevDir.push_back(d);
-	//				}
-	//				break;
-	//			}
-
-	//			if (table_[tgt.z][tgt.x].bType == fillType) {
-	//				SetBlock(tgt, _type);
-	//				FILLPOINT pushPts;
-	//				pushPts.Set(tgt);
-	//				pushPts.prevDir.push_back(-d);
-	//				fillList.push_back(pushPts);
-	//			}
-	//		}
-	//	}
-	//}
 	
 	while (fillList.size() > 0) {
-		FILLPOINT fTgt = fillList.front();
+		FILLPOINT fTgtBase = fillList.front();
 		fillList.erase(fillList.begin());
-		//ターゲットのbyteをdirとANDし、dirではないか
+		//ターゲットのbitをdirとANDし、dirではないか
 		//trueであれば、既にfillListにあるかを視る
 		//　あればそれのdirByteに逆を追加する
 		//　なければtgt,dirByte逆を新規追加
@@ -161,31 +130,35 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 		//前方向の逆を要するに全方向の逆と前方向とAND取って0だったらその方向はいいってわけでしょう
 
 		//前方向の逆を調べるため、byteを反転
-		byte findDir = ~fTgt.dirByte;
+		bitset<DIR_MAX> findDir = ~fTgtBase.dirBit;
+
+		//全方向から調べる方向を探す(前方向を1として記録しているため、
+		//反転させた後に方向ごとANDを取り1であれば調べられる)
 
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-			//反転ビット
-			if ((fTgt.dirByte & ReverseDir(d)) == 0) {
-
-			}
-				POINT dirPts;
-				StoreDirToPoint(dirPts, d);
-				POINT tgt = tgtBase + dirPts;
-	
+			bitset<DIR_MAX> dBit(d);
+			if ((findDir & dBit) == dBit) {
+				//調べる方向の1マス先が既にぬりつぶしリストに存在するかを見る
+				//存在するならばそのままdirBitに調べている方向の"逆方向"を追加
+				//存在しなければ種類一致の条件をかけ、一致すればぬりつぶし、マスを新規追加
+				POINT tgt = fTgtBase.GetPoint() + StoreDirToPoint(d);
+				bool isExists = false;
 				for (auto& fL : fillList) {
-					if (fL.GetPoint() == tgt) {
-						fL.prevDir.push_back(d);
+					if (fL.GetPoint() == tgt.GetPoint()) {
+						isExists = true;
+						fL.dirBit |= bitset<DIR_MAX>(ReverseDir(d));
+						break;
 					}
-					break;
 				}
-	
-				if (table_[tgt.z][tgt.x].bType == fillType) {
-					SetBlock(tgt, _type);
-					FILLPOINT pushPts;
-					pushPts.Set(tgt);
-					pushPts.prevDir.push_back(-d);
-					fillList.push_back(pushPts);
+				if (!isExists) {
+					if (table_[tgt.z][tgt.x].bType == fillType) {
+						SetBlock(tgt, _type);
+						FILLPOINT pushPts;
+						pushPts.Set(tgt);
+						pushPts.dirBit |= bitset<DIR_MAX>(ReverseDir(d));
+					}
 				}
+			}
 		}
 	}
 
@@ -212,6 +185,13 @@ void Stage::StoreDirToPoint(POINT &pts, DIRECTION dir)
 	}
 }
 
+Stage::POINT Stage::StoreDirToPoint(DIRECTION dir)
+{
+	POINT ret;
+	StoreDirToPoint(ret, dir);
+	return ret;
+}
+
 Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
 {
 	switch (dir) {
@@ -222,14 +202,6 @@ Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
 	}						return dir;
 }
 
-byte Stage::ReverseDir(byte b)
-{
-	byte tmp = 0b0000;
-	if (b & DIR_LEFT == DIR_LEFT) {
-		tmp |= DIR_RIGHT;
-	}
-	return tmp;
-}
 
 
 void Stage::NewFile()
