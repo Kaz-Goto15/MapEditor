@@ -15,7 +15,7 @@ Stage::Stage(GameObject* parent) :
 	isEdited_(false)
 {
 	std::fill(hModel_, hModel_ + MODEL_NUM, -1);
-	NewFile();
+	//NewFile();
 }
 
 //デストラクタ
@@ -99,7 +99,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		if (LOWORD(wp) == ID_MENU_SAVE) { SaveFile();	break; }
 		if (LOWORD(wp) == ID_MENU_OPEN) { LoadFile();	break; }
-		if (LOWORD(wp) == ID_MENU_NEW) { NewFile();	break; }
+		if (LOWORD(wp) == ID_MENU_NEW)	{ NewFile();	break; }
 	}
 	return FALSE;
 }
@@ -188,7 +188,6 @@ void Stage::Act()
 		}
 }
 
-
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
 	table_[_z][_x].bType = _type;
@@ -203,6 +202,7 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 {
 	table_[_z][_x].height = _height;
 }
+
 
 void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 {
@@ -311,6 +311,8 @@ bool Stage::IsExistsWithin(POINT pts)
 void Stage::NewFile()
 {
 	if (ConfirmDestruct()) {
+		NewProjSetUp();
+
 		for (int z = 0; z < Z_SIZE; z++) {
 			for (int x = 0; x < X_SIZE; x++) {
 				SetBlock(x, z, DEFAULT);
@@ -518,3 +520,46 @@ void Stage::GetSingleData(std::string* result, std::string data, DWORD* index)
 	*result += '\0';
 	(*index)++;
 }
+
+BOOL CALLBACK MyDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg) {
+	case WM_INITDIALOG:
+		// ダイアログの初期化処理
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"草");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"砂");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"水");
+
+		return TRUE;
+	case WM_COMMAND:
+		// ダイアログのコマンド処理
+		if (LOWORD(wParam) == IDOK) {
+			MessageBox(hDlg, "AAA.cppのダイアログコマンドを実行", "AAA Dialog", MB_OK);
+		}
+		if (LOWORD(wParam) == IDCANCEL) {
+			EndDialog(hDlg, IDCANCEL);
+		}
+		return TRUE;
+	case WM_CLOSE:
+		EndDialog(hDlg, IDCANCEL);
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
+void Stage::NewProjSetUp()
+{
+	const char* iniPath = ".\\Assets/mapeditor.ini";
+	::GetPrivateProfileInt("ファイル", "new_w", 0, iniPath);
+	DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG_NEWSETUP), NULL, (DLGPROC)MyDialogProc);
+}
+/*
+私は今、各クラスでOpenし、帰ってきた値(int)を用いて値を読み込みCloseすると考えていました。
+int hIni = IniFileManager::Open("init.ini");
+int hoge = IniFileManager::Get(Ini, "Section", "key");
+IniFileManager::Close(hIni);
+気づきましたが、この実装だと各クラスごと呼び
+*/

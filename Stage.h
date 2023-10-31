@@ -132,5 +132,7 @@ private:
 	void LoadData(DWORD _fileSize, char* _puredata, std::vector<std::vector<std::string>>* _data);
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
-
+	//INT_PTR CALLBACK MyDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	const char* iniPath;
+	void NewProjSetUp();
 };
