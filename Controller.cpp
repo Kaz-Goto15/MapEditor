@@ -63,7 +63,7 @@ void Controller::Update()
 	default:
 		//Set(MouseL)
 		if (Input::IsMouseButtonDown(0)) {
-			//((Stage*)(FindObject("Stage")))->Set();
+			((Stage*)(FindObject("Stage")))->Act();
 		}
 		break;
 	}

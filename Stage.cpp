@@ -6,7 +6,105 @@
 #include "Controller.h"
 
 using std::string;
-void Stage::Set()
+
+//コンストラクタ
+Stage::Stage(GameObject* parent) :
+	GameObject(parent, "Stage"),
+	mode_(-1),
+	select_(-1),
+	isEdited_(false)
+{
+	std::fill(hModel_, hModel_ + MODEL_NUM, -1);
+	NewFile();
+}
+
+//デストラクタ
+Stage::~Stage()
+{
+}
+
+//初期化
+void Stage::Initialize()
+{
+	std::string modelName[] = {
+		"BoxDefault","BoxBrick","BoxGrass","BoxSand", "BoxWater"
+	};
+
+	//モデルデータのロード
+	std::string ext = "fbx";
+	std::string folder = "Assets/";
+	for (int i = 0; i < MODEL_NUM; i++) {
+		hModel_[i] = Model::Load(folder + modelName[i] + "." + ext);
+		assert(hModel_[i] >= 0);
+	}
+	//ブロックのタイプをセット
+	for (int z = 0; z < Z_SIZE; z++) {
+		for (int x = 0; x < X_SIZE; x++) {
+			SetBlock(x, z, (BLOCKTYPE)((x + z) % MODEL_NUM));
+		}
+	}
+
+}
+
+//更新
+void Stage::Update()
+{
+}
+
+//描画
+void Stage::Draw()
+{
+	Transform stageTrans;
+	for (int z = 0; z < Z_SIZE; z++) {
+		stageTrans.position_.z = z;
+		for (int x = 0; x < X_SIZE; x++) {
+			stageTrans.position_.x = x;
+			for (int y = 0; y < table_[z][x].height + 1; y++) {
+				stageTrans.position_.y = y;
+				Model::SetTransform(hModel_[table_[z][x].bType], stageTrans);
+				Model::Draw(hModel_[table_[z][x].bType]);
+			}
+		}
+	}
+}
+
+//開放
+void Stage::Release()
+{
+}
+
+BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_INITDIALOG:
+		//SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_SETCHECK, BST_CHECKED, 0);
+		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
+		mode_ = MODE::UP;
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"草");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"砂");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"水");
+		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_SETCURSEL, 0, 0);
+		select_ = BLOCKTYPE::DEFAULT;
+		return TRUE;
+	case WM_COMMAND:
+		if (SendMessage(GetDlgItem(hDlg, LOWORD(wp)), BM_GETCHECK, 0, 0) == BST_CHECKED) {
+			mode_ = LOWORD(wp);
+		}
+		if (LOWORD(wp) == IDC_COMBO_BLOCKTYPE) {
+			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_GETCURSEL, 0, 0);
+			break;
+		}
+		if (LOWORD(wp) == ID_MENU_SAVE) { SaveFile();	break; }
+		if (LOWORD(wp) == ID_MENU_OPEN) { LoadFile();	break; }
+		if (LOWORD(wp) == ID_MENU_NEW) { NewFile();	break; }
+	}
+	return FALSE;
+}
+
+void Stage::Act()
 {
 		//ビューポート行列
 		float w = (float)(Direct3D::scrWidth / 2.0f);
@@ -71,7 +169,7 @@ void Stage::Set()
 		std::string resStr = "change: " + std::to_string(changeTile[1]) + ", " + std::to_string(changeTile[0]) + "\n";
 		OutputDebugString(resStr.c_str());
 		if (shortestDist != -1) {
-			isEdited = true;
+			isEdited_ = true;
 			switch (mode_) {
 			case MODE::UP:
 				SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height += 1);
@@ -81,12 +179,16 @@ void Stage::Set()
 					SetBlockHeight(changeTile[0], changeTile[1], table_[changeTile[1]][changeTile[0]].height -= 1);
 				break;
 			case MODE::CHANGE:
-				//SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				SetBlock(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
+				break;
+			case MODE::FILL:
 				Fill(changeTile[0], changeTile[1], (BLOCKTYPE)select_);
 				break;
 			}
 		}
 }
+
+
 void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 {
 	table_[_z][_x].bType = _type;
@@ -94,7 +196,7 @@ void Stage::SetBlock(int _x, int _z, BLOCKTYPE _type)
 
 void Stage::SetBlock(POINT pts, BLOCKTYPE _type)
 {
-	SetBlock(pts.z, pts.x, _type);
+	SetBlock(pts.x, pts.z, _type);
 }
 
 void Stage::SetBlockHeight(int _x, int _z, int _height)
@@ -104,72 +206,63 @@ void Stage::SetBlockHeight(int _x, int _z, int _height)
 
 void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 {
-	ss.str(""); ss << "Trigger:[" << _z << "," << _x << "]\n";OutputDebugString(ss.str().c_str());
-	//自身の上下左右が塗る前の色であれば、そこを塗り、vectorに座標と塗られる前の向きを記録する
-	//whileでvectorが0になるまで続ける：
-	//vectorの一番最初を取り出す
-	//上下左右を視る　このとき、塗られる前の向きは調べない
-	//塗る前の色と最初に記録したやつが同じとき、塗り、登録する
+	//ss.str(""); ss << "Trigger:[" << _z << "," << _x << "]\n";OutputDebugString(ss.str().c_str());
 
 	//まず自身の種類を記憶し、塗る
 	BLOCKTYPE fillType = table_[_z][_x].bType;
 	SetBlock(_x, _z, _type);
-
+	//ss.str(""); ss << fillType << bTypeStr[fillType] << " > " << _type << bTypeStr[_type] << "\n"; OutputDebugString(ss.str().c_str());
+	
+	//自身を塗りつぶしリストに追加
 	vector<FILLPOINT> fillList;
 	FILLPOINT tgtBase;
 	tgtBase.Set(_x, _z);
 	fillList.push_back(tgtBase);
 	
+	//塗りつぶしリストが空になるまでループ
+	//リスト内には座標と塗られた方向が格納されている
 	while (fillList.size() > 0) {
 		FILLPOINT fTgtBase = fillList.front();
 		fillList.erase(fillList.begin());
-		//ターゲットのbitをdirとANDし、dirではないか
-		//trueであれば、既にfillListにあるかを視る
-		//　あればそれのdirByteに逆を追加する
-		//　なければtgt,dirByte逆を新規追加
 
-		//前方向の逆を要するに全方向の逆と前方向とAND取って0だったらその方向はいいってわけでしょう
-
-		//前方向の逆を調べるため、byteを反転
-		bitset<DIR_MAX> findDir = ~fTgtBase.prevDirBit;
-
-		ss.str(""); ss << "Watch:[" << fTgtBase.z << "," << fTgtBase.x << "] Dir:" << dirBitToStr(findDir) << "\n"; OutputDebugString(ss.str().c_str());
-
-		//全方向から調べる方向を探す(前方向を1として記録しているため、
-		//反転させた後に方向ごとANDを取り1であれば調べられる)
-		//そもそも範囲内かを見る必要もあり
+		//前方向の逆を調べる
+		bitset<DIR_MAX> findDir = ~fTgtBase.prevDirBit;	//前方向の反転ビット
+		//ss.str(""); ss << "Watch:[" << fTgtBase.z << "," << fTgtBase.x << "] Dir:" << dirBitToStr(findDir) << "\n"; OutputDebugString(ss.str().c_str());
 		for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
 			bitset<DIR_MAX> dBit(dirBit[d]);
 			if ((findDir & dBit) == dBit) {
-				//調べる方向の1マス先が既にぬりつぶしリストに存在するかを見る
-				//存在するならばそのままdirBitに調べている方向の"逆方向"を追加
-				//存在しなければ種類一致の条件をかけ、一致すればぬりつぶし、マスを新規追加
+				//調べる方向に1マス伸ばした座標を見る
 				POINT tgt = fTgtBase.GetPoint() + StoreDirToPoint(d);
-
-				ss.str(""); ss << "Find:[" << tgt.z << "," << tgt.x << "] DirFromWatch: " << dirStr[ReverseDir(d)] << "Result: "; OutputDebugString(ss.str().c_str());
-
+				//ss.str(""); ss << "Find:[" << tgt.z << "," << tgt.x << "] DirFromWatch: " << dirStr[d] << " Result: "; OutputDebugString(ss.str().c_str());
+				
+				//マップ外ならcontinue
 				if (!IsExistsWithin(tgt)) {
-					ss.str(""); ss << "OutofRange\n"; OutputDebugString(ss.str().c_str());
+					//ss.str(""); ss << "OutofRange\n"; OutputDebugString(ss.str().c_str());
 					continue;
 				};
+
+				//既にリストにある場合、調べている方向の逆方向を追加
 				bool isExists = false;
 				for (auto& fL : fillList) {
 					if (fL.GetPoint() == tgt.GetPoint()) {
-						ss.str(""); ss << "Already Added\n"; OutputDebugString(ss.str().c_str());
+						//ss.str(""); ss << "Already Added\n"; OutputDebugString(ss.str().c_str());
 						isExists = true;
 						fL.prevDirBit |= dirBit[ReverseDir(d)];
 						break;
 					}
 				}
+				//リストにない場合
+				//ブロックが置換対象タイプであれば置き換え、リストにその座標と調べている方向の逆方向を追加
 				if (!isExists) {
 					if (table_[tgt.z][tgt.x].bType == fillType) {
-						ss.str(""); ss << "Fill&Add\n"; OutputDebugString(ss.str().c_str());
+						//ss.str(""); ss << "Fill&Add\n"; OutputDebugString(ss.str().c_str());
 						SetBlock(tgt, _type);
 						FILLPOINT pushPts;
 						pushPts.Set(tgt);
 						pushPts.prevDirBit |= dirBit[ReverseDir(d)];
 						fillList.push_back(pushPts);
 					}
+					//else ss.str(""); ss << "Unmatch BlockType(" << bTypeStr[table_[tgt.z][tgt.x].bType] << ")\n"; OutputDebugString(ss.str().c_str());
 				}
 			}
 		}
@@ -177,32 +270,15 @@ void Stage::Fill(int _x, int _z, BLOCKTYPE _type)
 
 }
 
-void Stage::StoreDirToPoint(POINT &pts, DIRECTION dir)
+Stage::POINT Stage::StoreDirToPoint(DIRECTION dir)
 {
 	switch (dir)
 	{
-	case Stage::DIR_LEFT:
-		pts = { -1, 0 };
-		break;
-	case Stage::DIR_RIGHT:
-		pts = { 1, 0 };
-		break;
-	case Stage::DIR_UP:
-		pts = { 0,1 };
-		break;
-	case Stage::DIR_DOWN:
-		pts = { 0,-1 };
-		break;
-	default:
-		break;
-	}
-}
-
-Stage::POINT Stage::StoreDirToPoint(DIRECTION dir)
-{
-	POINT ret;
-	StoreDirToPoint(ret, dir);
-	return ret;
+	case Stage::DIR_LEFT:	return { -1, 0 };
+	case Stage::DIR_RIGHT:	return { 1, 0 };
+	case Stage::DIR_UP:		return { 0, 1 };
+	case Stage::DIR_DOWN:	return { 0,-1 };
+	}						return { 0,0 };
 }
 
 Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
@@ -215,26 +291,33 @@ Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
 	}						return dir;
 }
 
-std::string Stage::dirBitToStr(bitset<DIR_MAX> db)
+bool Stage::IsExistsWithin(POINT pts)
 {
-	std::string ret;
-	for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
-		bitset<DIR_MAX> dBit(dirBit[d]);
-		if ((db & dBit) == dBit)ret.append(dirStr[d]);
-	}
-		return ret;
+	if (pts.x < 0 || pts.z < 0 || pts.x >= X_SIZE || pts.z >= Z_SIZE)
+		return false;
+	return true;
 }
+
+//std::string Stage::dirBitToStr(bitset<DIR_MAX> db)
+//{
+//	std::string ret;
+//	for (DIRECTION d = DIR_LEFT; d < DIR_MAX; d = static_cast<DIRECTION>(d + 1)) {
+//		bitset<DIR_MAX> dBit(dirBit[d]);
+//		if ((db & dBit) == dBit)ret.append(dirStr[d]);
+//	}
+//		return ret;
+//}
 
 void Stage::NewFile()
 {
-	if (DestructContent()) {
+	if (ConfirmDestruct()) {
 		for (int z = 0; z < Z_SIZE; z++) {
 			for (int x = 0; x < X_SIZE; x++) {
 				SetBlock(x, z, DEFAULT);
 				SetBlockHeight(x, z, 0);
 			}
 		}
-		isEdited = false;
+		isEdited_ = false;
 	}
 }
 
@@ -328,7 +411,7 @@ bool Stage::LoadFile()
 	//キャンセルしたら中断
 	if (selFile == FALSE) return false;
 
-	if (!DestructContent())return false;
+	if (!ConfirmDestruct())return false;
 	HANDLE hFile;
 	//ファイルを開く
 	hFile = CreateFile(
@@ -386,12 +469,12 @@ bool Stage::LoadFile()
 		for (int x = 0; x < data_[y].size(); x++)
 			data_[y][x].clear();
 
-	isEdited = false;
+	isEdited_ = false;
 }
 
-bool Stage::DestructContent()
+bool Stage::ConfirmDestruct()
 {
-	if (isEdited) {
+	if (isEdited_) {
 		int result = MessageBox(NULL, "現在の編集データは破棄されますがよろしいですか?", "Map Editor", MB_OKCANCEL | MB_ICONEXCLAMATION);
 		if (result == IDOK)return true;
 		return false;
@@ -434,132 +517,4 @@ void Stage::GetSingleData(std::string* result, std::string data, DWORD* index)
 	//最後に「\0」を付ける
 	*result += '\0';
 	(*index)++;
-}
-
-//コンストラクタ
-Stage::Stage(GameObject* parent):
-	GameObject(parent, "Stage"),
-	mode_(-1),
-	select_(-1),
-	isEdited(false)
-{
-	std::fill(hModel_, hModel_+ MODEL_NUM, -1);
-	NewFile();
-}
-
-bool Stage::IsExistsWithin(POINT pts)
-{
-	if (pts.x < 0 || pts.z < 0 || pts.x > X_SIZE || pts.z > Z_SIZE)
-		return false;
-	return true;
-}
-
-//デストラクタ
-Stage::~Stage()
-{
-}
-
-//初期化
-void Stage::Initialize()
-{
-	std::string modelName[] = {
-		"BoxDefault","BoxBrick","BoxGrass","BoxSand", "BoxWater"
-	};
-	//モデルデータのロード
-	std::string ext = "fbx";
-	std::string folder = "Assets/";
-	for (int i = 0; i < MODEL_NUM; i++) {
-		hModel_[i] = Model::Load(folder + modelName[i] + "." + ext);
-		assert(hModel_[i] >= 0);
-	}
-	//ブロックのタイプをセット
-	for (int z = 0; z < Z_SIZE; z++) {
-		for (int x = 0; x < X_SIZE; x++) {
-		   SetBlock(x,z,(BLOCKTYPE)((x+z)%MODEL_NUM));
-		}
-	}
-
-}
-
-//更新
-void Stage::Update()
-{
-	if (Input::IsKeyDown(DIK_8)) {
-		Set();
-	}
-}
-
-//描画
-void Stage::Draw()
-{
-	Transform stageTrans;
-	for (int z = 0; z < Z_SIZE; z++) {
-		stageTrans.position_.z = z;
-		for (int x = 0; x < X_SIZE; x++) {
-			stageTrans.position_.x = x;
-			for (int y = 0; y < table_[z][x].height + 1; y++) {
-				stageTrans.position_.y = y;
-
-				Model::SetTransform(hModel_[table_[z][x].bType], stageTrans);
-				Model::Draw(hModel_[table_[z][x].bType]);
-			}
-		}
-
-	}
-
-}
-
-//開放
-void Stage::Release()
-{
-}
-
-BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-	case WM_INITDIALOG:
-		//SendMessage(GetDlgItem(hDlg, IDC_CHECK_INERTIA), BM_SETCHECK, BST_CHECKED, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
-		mode_ = MODE::UP;
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"草");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"砂");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_ADDSTRING, 0, (LPARAM)"水");
-		SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_SETCURSEL, 0, 0);
-		return TRUE;
-	case WM_COMMAND:
-		if (SendMessage(GetDlgItem(hDlg, LOWORD(wp)), BM_GETCHECK, 0, 0) == BST_CHECKED) {
-			mode_ = LOWORD(wp);
-		}
-		if (LOWORD(wp) == IDC_COMBO_BLOCKTYPE) {
-			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_GETCURSEL, 0, 0);
-				break;
-		}
-		if (LOWORD(wp) == ID_MENU_SAVE) {
-			SaveFile();
-			break;
-		}
-		if (LOWORD(wp) == ID_MENU_OPEN) {
-			LoadFile();
-			break;
-		}
-		if (LOWORD(wp) == ID_MENU_NEW) {
-			NewFile();
-			break;
-		}
-		//switch (LOWORD(wp)) {
-
-		//case IDC_RADIO_CHANGE:
-		//    if (SendMessage(GetDlgItem(hDlg, IDC_RADIO_CHANGE), BM_GETCHECK, 0, 0) == BST_CHECKED) {
-		//        mode_ = LOWORD(wp);
-		//    }
-		//    break;
-		//case IDC_COMBO_BLOCKTYPE:
-		//    select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_BLOCKTYPE), CB_GETCURSEL, 0, 0);
-		//    break;
-		//}
-	}
-	return FALSE;
 }
