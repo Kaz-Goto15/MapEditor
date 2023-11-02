@@ -5,6 +5,7 @@
 #include <bitset>
 #include <sstream>
 using std::bitset;
+using std::vector;
 
 namespace {
 	const int MODEL_NUM = 5;
@@ -23,8 +24,6 @@ namespace {
 		CHANGE = IDC_RADIO_CHANGE,
 		FILL = IDC_RADIO_FILL,
 	};
-
-
 }
 //ステージを管理するクラス
 class Stage : public GameObject
@@ -43,16 +42,21 @@ public:
 	/// </summary>
 	void Act();
 
+	void SetBlock(int _x, int _z, BLOCKTYPE _type);
+	void SetBlock(POINT pts, BLOCKTYPE _type);
 	//偽プロシージャ
 	BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
-
+	//int n = 3;
 private:
 	int hModel_[MODEL_NUM];    //モデル番号
-	struct {
+	struct MAP_TABLE {
 		BLOCKTYPE bType;
 		int height;
 	}table_[Z_SIZE][X_SIZE];
-
+	//vector<vector<MAP_TABLE>> table_(Z_SIZE, vector<MAP_TABLE>(X_SIZE), DEFAULT);
+	//std::vector<std::vector<MAP_TABLE>> table_();
+	//int n = 3;
+	//vector < vector<int> > vv(n);
 	int mode_;      //0:あげる 1:さげる 2:種類カエル 3:ぬりつぶし
 	int select_;    //種類
 	bool isEdited_;
@@ -64,7 +68,7 @@ private:
 		DIR_DOWN,
 		DIR_MAX = sizeof(DIRECTION),
 	};
-	std::vector<bitset<DIR_MAX>> dirBit = { 0b1000,0b0100,0b0010,0b0001 };
+	vector<bitset<DIR_MAX>> dirBit = { 0b1000,0b0100,0b0010,0b0001 };
 
 	typedef struct POINT {
 		int x = 0;
@@ -111,8 +115,8 @@ private:
 		bitset<DIR_MAX> prevDirBit = 0;
 	};
 
-	void SetBlock(int _x, int _z, BLOCKTYPE _type);
-	void SetBlock(POINT pts, BLOCKTYPE _type);
+	//void SetBlock(int _x, int _z, BLOCKTYPE _type);
+	//void SetBlock(POINT pts, BLOCKTYPE _type);
 	void SetBlockHeight(int _x, int _z, int _height);
 	void Fill(int _x, int _z, BLOCKTYPE _type);
 
@@ -129,10 +133,10 @@ private:
 	bool SaveFile();
 	bool LoadFile();
 	bool ConfirmDestruct();
-	void LoadData(DWORD _fileSize, char* _puredata, std::vector<std::vector<std::string>>* _data);
+	void LoadData(DWORD _fileSize, char* _puredata, vector<vector<std::string>>* _data);
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
-	//INT_PTR CALLBACK MyDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	//INT_PTR CALLBACK NewProjSetUpDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	const char* iniPath;
 	void NewProjSetUp();
 };

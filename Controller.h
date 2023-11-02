@@ -18,7 +18,6 @@ namespace {
         MD_CTRL = DIK_LCONTROL,
         MD_MAX = sizeof(MODIFIER_KEY)-1
     };
-
 }
 //‘€ì‚ğŠÇ—‚·‚éƒNƒ‰ƒX
 class Controller : public GameObject
