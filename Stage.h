@@ -25,6 +25,11 @@ namespace {
 		FILL = IDC_RADIO_FILL,
 	};
 }
+namespace NewProjSetUp {
+	
+	void Init(HWND hDlg);
+}
+
 //ステージを管理するクラス
 class Stage : public GameObject
 {
@@ -42,11 +47,11 @@ public:
 	/// </summary>
 	void Act();
 
-	void SetBlock(int _x, int _z, BLOCKTYPE _type);
-	void SetBlock(POINT pts, BLOCKTYPE _type);
+	//void SetBlock(int _x, int _z, BLOCKTYPE _type);
+	//void SetBlock(POINT pts, BLOCKTYPE _type);
 	//偽プロシージャ
 	BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
-	//int n = 3;
+	void NPSUIni(HWND hDlg);
 private:
 	int hModel_[MODEL_NUM];    //モデル番号
 	struct MAP_TABLE {
@@ -115,8 +120,8 @@ private:
 		bitset<DIR_MAX> prevDirBit = 0;
 	};
 
-	//void SetBlock(int _x, int _z, BLOCKTYPE _type);
-	//void SetBlock(POINT pts, BLOCKTYPE _type);
+	void SetBlock(int _x, int _z, BLOCKTYPE _type);
+	void SetBlock(POINT pts, BLOCKTYPE _type);
 	void SetBlockHeight(int _x, int _z, int _height);
 	void Fill(int _x, int _z, BLOCKTYPE _type);
 
@@ -136,7 +141,7 @@ private:
 	void LoadData(DWORD _fileSize, char* _puredata, vector<vector<std::string>>* _data);
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
-	//INT_PTR CALLBACK NewProjSetUpDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	//void NPSUIni(HWND hDlg);
 	const char* iniPath;
 	void NewProjSetUp();
 };
