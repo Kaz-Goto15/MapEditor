@@ -2,7 +2,6 @@
 #include "Engine/Model.h"
 #include "Engine/Input.h"
 #include <string>
-#include <sstream>
 #include "Controller.h"
 
 using std::string;
@@ -15,6 +14,7 @@ Stage::Stage(GameObject* parent) :
 	isEdited_(false)
 {
 	std::fill(hModel_, hModel_ + MODEL_NUM, -1);
+	//table_.resize(Z_SIZE, vector<MAP_TABLE>(X_SIZE));
 	//NewFile();
 }
 
@@ -61,6 +61,7 @@ void Stage::Draw()
 			stageTrans.position_.x = x;
 			for (int y = 0; y < table_[z][x].height + 1; y++) {
 				stageTrans.position_.y = y;
+				//table_[z][x].
 				Model::SetTransform(hModel_[table_[z][x].bType], stageTrans);
 				Model::Draw(hModel_[table_[z][x].bType]);
 			}
@@ -310,6 +311,7 @@ bool Stage::IsExistsWithin(POINT pts)
 
 void Stage::NewFile()
 {
+	//table_.resize(Z_SIZE, vector<MAP_TABLE>(X_SIZE));
 	if (ConfirmDestruct()) {
 		NewProjSetUp();
 
@@ -521,7 +523,25 @@ void Stage::GetSingleData(std::string* result, std::string data, DWORD* index)
 	(*index)++;
 }
 
-BOOL CALLBACK MyDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+class MapTemplate {
+public:
+	virtual void Run() = 0;
+protected:
+	string templateName = "";
+};
+class MapTDefault : MapTemplate {
+	MapTDefault(string name) { templateName = name; }
+	void Run() override {
+		//ブロックのタイプをセット
+		for (int z = 0; z < Z_SIZE; z++) {
+			for (int x = 0; x < X_SIZE; x++) {
+				Stage::SetBlock(x, z, (BLOCKTYPE)((x + z) % MODEL_NUM));
+			}
+		}
+	}
+};
+
+BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 	case WM_INITDIALOG:
@@ -536,7 +556,8 @@ BOOL CALLBACK MyDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		// ダイアログのコマンド処理
 		if (LOWORD(wParam) == IDOK) {
-			MessageBox(hDlg, "AAA.cppのダイアログコマンドを実行", "AAA Dialog", MB_OK);
+			SendDlgItemMessage(hDlg,IDC_NEWSETUP_EDIT_WIDTH,EM_GETLINE,0,(LPARAM)X_SIZE);
+			SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, EM_GETLINE, 0, (LPARAM)Z_SIZE);
 		}
 		if (LOWORD(wParam) == IDCANCEL) {
 			EndDialog(hDlg, IDCANCEL);
@@ -554,12 +575,5 @@ void Stage::NewProjSetUp()
 {
 	const char* iniPath = ".\\Assets/mapeditor.ini";
 	::GetPrivateProfileInt("ファイル", "new_w", 0, iniPath);
-	DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG_NEWSETUP), NULL, (DLGPROC)MyDialogProc);
+	DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG_NEWSETUP), NULL, (DLGPROC)NewProjSetUpDialogProc);
 }
-/*
-私は今、各クラスでOpenし、帰ってきた値(int)を用いて値を読み込みCloseすると考えていました。
-int hIni = IniFileManager::Open("init.ini");
-int hoge = IniFileManager::Get(Ini, "Section", "key");
-IniFileManager::Close(hIni);
-気づきましたが、この実装だと各クラスごと呼び
-*/
