@@ -25,15 +25,17 @@ namespace {
 		FILL = IDC_RADIO_FILL,
 	};
 }
-namespace NewProjSetUp {
-	
-	void Init(HWND hDlg);
-}
+
 
 //ステージを管理するクラス
 class Stage : public GameObject
 {
 public:
+	namespace NewProjSetUp {
+
+		void Init(HWND hDlg);
+	};
+
 	Stage(GameObject* parent);
 	~Stage();
 	void Initialize() override;
