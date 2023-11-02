@@ -13,14 +13,6 @@ void TestScene::Initialize()
 	Instantiate<Controller>(this);
 }
 
-void TestScene::Update()
-{
-}
-
-void TestScene::Draw()
-{
-}
-
-void TestScene::Release()
-{
-}
+void TestScene::Update() {}
+void TestScene::Draw(){}
+void TestScene::Release(){}
