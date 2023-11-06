@@ -11,6 +11,8 @@ namespace {
 	const int MODEL_NUM = 5;
 	const int X_SIZE = 15;
 	const int Z_SIZE = 15;
+	int xx;
+	int zz;
 	enum BLOCKTYPE {
 		DEFAULT,
 		BRICK,
@@ -24,6 +26,7 @@ namespace {
 		CHANGE = IDC_RADIO_CHANGE,
 		FILL = IDC_RADIO_FILL,
 	};
+	std::string objName = "Stage";
 }
 
 
@@ -31,10 +34,6 @@ namespace {
 class Stage : public GameObject
 {
 public:
-	namespace NewProjSetUp {
-
-		void Init(HWND hDlg);
-	};
 
 	Stage(GameObject* parent);
 	~Stage();
@@ -53,7 +52,7 @@ public:
 	//void SetBlock(POINT pts, BLOCKTYPE _type);
 	//偽プロシージャ
 	BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
-	void NPSUIni(HWND hDlg);
+	//void NewInit(HWND hDlg);
 private:
 	int hModel_[MODEL_NUM];    //モデル番号
 	struct MAP_TABLE {
@@ -144,6 +143,7 @@ private:
 	void GetSingleData(std::string* result, std::string data, DWORD* index);
 
 	//void NPSUIni(HWND hDlg);
+	//BOOL NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 	const char* iniPath;
 	void NewProjSetUp();
 };

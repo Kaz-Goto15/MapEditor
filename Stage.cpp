@@ -6,22 +6,7 @@
 
 using std::string;
 
-namespace NewProjSetUp {
-	void Init(HWND hDlg) {
-		int newW, newH;
-		const char* iniPath = ".\\Assets/mapeditor.ini";
-		::GetPrivateProfileInt(objectName_.c_str(), "new_w", newW, iniPath);
-		::GetPrivateProfileInt(objectName_.c_str(), "new_h", newH, iniPath);
-		// ダイアログの初期化処理
-		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, WM_SETTEXT, 0, (LPARAM)newW);
-		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, WM_SETTEXT, 0, (LPARAM)newH);
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"草");
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"砂");
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"水");
-	}
-}
+
 
 //コンストラクタ
 Stage::Stage(GameObject* parent) :
@@ -557,14 +542,14 @@ class MapTDefault : MapTemplate {
 		}
 	}
 };
-void Stage::NPSUIni(HWND hDlg) {
-	int newW, newH;
-	const char* iniPath = ".\\Assets/mapeditor.ini";
-	::GetPrivateProfileInt(objectName_.c_str(), "new_w", newW, iniPath);
-	::GetPrivateProfileInt(objectName_.c_str(), "new_h", newH, iniPath);
+void NewInit(HWND hDlg) {
+	int newW = 0, newH = 0;
+	const char* iniPath = "..\\..\\Assets/mapeditor.ini";
+	::GetPrivateProfileInt(objName.c_str(), "new_w", newW, iniPath);
+	::GetPrivateProfileInt(objName.c_str(), "new_h", newH, iniPath);
 	// ダイアログの初期化処理
-	SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, WM_SETTEXT, 0, (LPARAM)newW);
-	SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, WM_SETTEXT, 0, (LPARAM)newH);
+	SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, WM_SETTEXT, 0, (LPARAM)9);
+	SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, WM_SETTEXT, 0, (LPARAM)9);
 	SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
 	SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
 	SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"草");
@@ -574,15 +559,27 @@ void Stage::NPSUIni(HWND hDlg) {
 
 BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	int newW = 0, newH = 0;
 	switch (msg) {
 	case WM_INITDIALOG:
-		NewProjSetUp::Init(hDlg);
+		//int newW = 0, newH = 0;
+		//const char* iniPath = "..\\..\\Assets/mapeditor.ini";
+		::GetPrivateProfileInt(objName.c_str(), "new_w", newW, "../../Assets/mapeditor.ini");
+		::GetPrivateProfileInt(objName.c_str(), "new_h", newH, "./Assets/mapeditor.ini");
+		// ダイアログの初期化処理
+		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, WM_SETTEXT, 0, (LPARAM)9);
+		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, WM_SETTEXT, 0, (LPARAM)9);
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"草");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"砂");
+		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"水");
 		return TRUE;
 	case WM_COMMAND:
 		// ダイアログのコマンド処理
 		if (LOWORD(wParam) == IDOK) {
-			SendDlgItemMessage(hDlg,IDC_NEWSETUP_EDIT_WIDTH,EM_GETLINE,0,(LPARAM)X_SIZE);
-			SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, EM_GETLINE, 0, (LPARAM)Z_SIZE);
+			SendDlgItemMessage(hDlg,IDC_NEWSETUP_EDIT_WIDTH,EM_GETLINE,0,(LPARAM)xx);
+			SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, EM_GETLINE, 0, (LPARAM)zz);
 		}
 		if (LOWORD(wParam) == IDCANCEL) {
 			EndDialog(hDlg, IDCANCEL);
