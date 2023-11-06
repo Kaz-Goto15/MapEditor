@@ -52,6 +52,7 @@ public:
 	//void SetBlock(POINT pts, BLOCKTYPE _type);
 	//偽プロシージャ
 	BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
+	BOOL sNewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
 	//void NewInit(HWND hDlg);
 private:
 	int hModel_[MODEL_NUM];    //モデル番号

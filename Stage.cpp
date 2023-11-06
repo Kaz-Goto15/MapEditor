@@ -4,6 +4,8 @@
 #include <string>
 #include "Controller.h"
 
+#include "Engine/RootJob.h"
+
 using std::string;
 
 
@@ -296,7 +298,8 @@ Stage::DIRECTION Stage::ReverseDir(DIRECTION dir)
 
 bool Stage::IsExistsWithin(POINT pts)
 {
-	if (pts.x < 0 || pts.z < 0 || pts.x >= X_SIZE || pts.z >= Z_SIZE)
+	if (pts.x < 0 || pts.z < 0 || 
+		pts.x >= X_SIZE || pts.z >= Z_SIZE)
 		return false;
 	return true;
 }
@@ -315,7 +318,7 @@ void Stage::NewFile()
 {
 	//table_.resize(Z_SIZE, vector<MAP_TABLE>(X_SIZE));
 	if (ConfirmDestruct()) {
-		NewProjSetUp();
+		//NewProjSetUp();
 
 		for (int z = 0; z < Z_SIZE; z++) {
 			for (int x = 0; x < X_SIZE; x++) {
@@ -557,7 +560,22 @@ void NewInit(HWND hDlg) {
 	SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"水");
 }
 
-BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+
+BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
+{
+	//BOOL dlp = TRUE;
+	//RootJob* pRootJob = nullptr;
+	//GameObject* obj;
+	//obj.fi
+	////RootJob* pRootJob = nullptr;
+	//dlp = ((Stage*)(obj->FindObject("RootJob"))
+	//	->FindObject("Stage"))
+	//	->sNewProjSetUpDialogProc(hDlg, msg, wp, lp);
+	//return dlp;
+	return TRUE;
+}
+
+BOOL Stage::sNewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	int newW = 0, newH = 0;
 	switch (msg) {
@@ -569,7 +587,7 @@ BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		// ダイアログの初期化処理
 		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, WM_SETTEXT, 0, (LPARAM)9);
 		SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, WM_SETTEXT, 0, (LPARAM)9);
-		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
+		//SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"デフォルト");
 		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"レンガ");
 		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"草");
 		SendMessage(GetDlgItem(hDlg, IDC_NEWSETUP_COMBO_TEMPLATE), CB_ADDSTRING, 0, (LPARAM)"砂");
@@ -578,7 +596,7 @@ BOOL CALLBACK NewProjSetUpDialogProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 	case WM_COMMAND:
 		// ダイアログのコマンド処理
 		if (LOWORD(wParam) == IDOK) {
-			SendDlgItemMessage(hDlg,IDC_NEWSETUP_EDIT_WIDTH,EM_GETLINE,0,(LPARAM)xx);
+			SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_WIDTH, EM_GETLINE, 0, (LPARAM)xx);
 			SendDlgItemMessage(hDlg, IDC_NEWSETUP_EDIT_HEIGHT, EM_GETLINE, 0, (LPARAM)zz);
 		}
 		if (LOWORD(wParam) == IDCANCEL) {
