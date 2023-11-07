@@ -308,7 +308,7 @@ bool Stage::IsExistsWithin(POINT pts)
 //		return ret;
 //}
 
-void Stage::NewFile()
+void Stage::NewFile() 
 {
 	if (ConfirmDestruct()) {
 		NewProjSetUp();
